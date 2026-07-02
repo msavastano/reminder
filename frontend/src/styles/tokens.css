@@ -1,0 +1,88 @@
+/* Kiln design tokens — ported from Kiln design system redesign/design_handoff_cast/README.md */
+:root {
+  /* Clay neutrals */
+  --clay-50: #F6F2EA;
+  --clay-100: #ECE6DA;
+  --clay-200: #E0D7C6;
+  --clay-300: #CFC2AB;
+  --clay-400: #B7A488;
+  --clay-500: #98856A;
+  --clay-600: #76654E;
+  --clay-700: #574A39;
+  --clay-800: #3B3228;
+  --clay-900: #251F18;
+
+  /* Terracotta (brand) */
+  --terracotta-100: #F4D6C7;
+  --terracotta-200: #E9B49B;
+  --terracotta-300: #DE9070;
+  --terracotta-500: #C2693F;
+  --terracotta-600: #A8552F;
+  --terracotta-700: #864226;
+
+  /* Accents / semantic */
+  --blue-500: #4F7FC4;
+  --green-500: #4E9E57;
+  --yellow-500: #E0B33D;
+  --coral-500: #D15F45;
+  --coral-600: #B14730;
+  --pink-500: #E194A8;
+
+  /* Semantic aliases */
+  --surface-page: #ECE6DA;
+  --surface-card: #F6F2EA;
+  --surface-sunken: #E0D7C6;
+  --surface-raised: #FFFFFF;
+  --text-strong: #251F18;
+  --text-body: #3B3228;
+  --text-muted: #76654E;
+  --text-subtle: #98856A;
+  --text-on-brand: #FFF6EF;
+  --text-link: #A8552F;
+  --brand: #C2693F;
+  --brand-soft: #F4D6C7;
+  --brand-soft-fg: #864226;
+  --border-soft: #DDD3C2;
+  --border-strong: #C7B89F;
+  --success: #4E9E57;
+  --warning: #E0B33D;
+  --danger: #B14730;
+
+  /* Radii */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 30px;
+  --radius-pill: 999px;
+
+  /* Shadows — the signature "clay" look: drop shadow + inner top highlight */
+  --shadow-clay-xs: 0 1px 2px rgba(55, 42, 28, .12), inset 0 1px 0 rgba(255, 255, 255, .45);
+  --shadow-clay-sm: 0 3px 6px -1px rgba(55, 42, 28, .16), inset 0 1.5px 0 rgba(255, 255, 255, .5);
+  --shadow-clay-md: 0 8px 18px -5px rgba(55, 42, 28, .22), inset 0 2px 2px rgba(255, 255, 255, .45);
+  --shadow-clay-lg: 0 18px 38px -10px rgba(55, 42, 28, .28), inset 0 2px 3px rgba(255, 255, 255, .5);
+  --shadow-clay-xl: 0 30px 64px -16px rgba(55, 42, 28, .34), inset 0 3px 4px rgba(255, 255, 255, .5);
+  --shadow-clay-pressed: inset 0 3px 6px rgba(55, 42, 28, .26), inset 0 1px 0 rgba(255, 255, 255, .12);
+  --shadow-brand: 0 10px 22px -6px rgba(168, 85, 47, .45), inset 0 2px 2px rgba(255, 255, 255, .32);
+
+  /* Spacing scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Motion */
+  --ease-clay: cubic-bezier(.34, 1.56, .64, 1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --dur-fast: 130ms;
+  --dur-base: 220ms;
+  --dur-slow: 360ms;
+
+  /* Typography */
+  --font-display: "Fredoka", system-ui, sans-serif;
+  --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}

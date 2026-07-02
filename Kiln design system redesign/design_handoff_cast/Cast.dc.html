@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/kiln-design-system-77e2620a-5cc2-438c-909a-7f0bf101a894/fonts.css">
+  <link rel="stylesheet" href="_ds/kiln-design-system-77e2620a-5cc2-438c-909a-7f0bf101a894/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/kiln-design-system-77e2620a-5cc2-438c-909a-7f0bf101a894/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/kiln-design-system-77e2620a-5cc2-438c-909a-7f0bf101a894/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/kiln-design-system-77e2620a-5cc2-438c-909a-7f0bf101a894/tokens/effects.css">
+  <link rel="stylesheet" href="_ds/kiln-design-system-77e2620a-5cc2-438c-909a-7f0bf101a894/base.css">
+  <link rel="stylesheet" href="_ds/kiln-design-system-77e2620a-5cc2-438c-909a-7f0bf101a894/styles.css">
+  <script src="_ds/kiln-design-system-77e2620a-5cc2-438c-909a-7f0bf101a894/_ds_bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    @keyframes castIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
+    @keyframes castPop { 0% { opacity:0; transform: scale(0.96); } 60% { transform: scale(1.01); } 100% { opacity:1; transform: scale(1); } }
+    @keyframes castScrim { from { opacity:0; } to { opacity:1; } }
+    @keyframes castBlink { 0%,49% { opacity:1; } 50%,100% { opacity:0; } }
+    .cast-term::-webkit-scrollbar { width: 9px; }
+    .cast-term::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 6px; }
+    .cast-term::-webkit-scrollbar-track { background: transparent; }
+    .cast-md { color: var(--text-body); font-family: var(--font-body); line-height: 1.7; font-size: 15px; }
+    .cast-md > :first-child { margin-top: 0; }
+    .cast-md h1, .cast-md h2, .cast-md h3, .cast-md h4 { font-family: var(--font-display); color: var(--text-strong); font-weight: 600; line-height: 1.25; margin: 1.6em 0 0.5em; letter-spacing: -0.01em; }
+    .cast-md h1 { font-size: 1.7rem; }
+    .cast-md h2 { font-size: 1.32rem; padding-bottom: 0.3em; border-bottom: 1px solid var(--border-soft); }
+    .cast-md h3 { font-size: 1.1rem; }
+    .cast-md p { margin: 0 0 1em; }
+    .cast-md a { color: var(--text-link); text-decoration: none; border-bottom: 1px solid var(--terracotta-200); }
+    .cast-md a:hover { border-bottom-color: var(--terracotta-500); }
+    .cast-md ul, .cast-md ol { margin: 0 0 1em; padding-left: 1.4em; }
+    .cast-md li { margin-bottom: 0.4em; }
+    .cast-md blockquote { margin: 1em 0; padding: 0.5em 1.1em; background: var(--clay-100); border-left: 3px solid var(--brand); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--text-muted); }
+    .cast-md code { font-family: var(--font-mono); font-size: 0.86em; background: var(--clay-200); color: var(--clay-800); padding: 0.12em 0.4em; border-radius: var(--radius-xs); }
+    .cast-md pre { background: var(--clay-900); border-radius: var(--radius-md); padding: 16px 18px; overflow-x: auto; margin: 0 0 1.2em; box-shadow: var(--shadow-clay-sm); }
+    .cast-md pre code { background: transparent; color: #ECE6DA; padding: 0; font-size: 0.84em; line-height: 1.6; }
+    .cast-md table { width: 100%; border-collapse: collapse; margin: 0 0 1.2em; font-size: 0.92em; }
+    .cast-md th, .cast-md td { border: 1px solid var(--border-soft); padding: 8px 12px; text-align: left; }
+    .cast-md th { background: var(--clay-100); font-weight: 600; color: var(--text-strong); }
+    .cast-md hr { border: none; border-top: 1px solid var(--border-soft); margin: 1.8em 0; }
+    .cast-navitem:hover { background: var(--clay-100) !important; color: var(--text-body) !important; }
+    .cast-drop:hover { border-color: var(--cast-accent, #C2693F) !important; background: var(--clay-50) !important; transform: translateY(-2px); }
+    .cast-recent:hover { background: var(--clay-100) !important; }
+    .cast-iconbtn:hover { background: var(--clay-200) !important; color: var(--coral-600) !important; }
+  </style>
+</helmet>
+
+<div style="height:100vh; display:flex; overflow:hidden; font-family:var(--font-body); color:var(--text-body); background:var(--surface-page); background-image: radial-gradient(circle at 12% 8%, rgba(194,105,63,0.06), transparent 42%), radial-gradient(circle at 92% 96%, rgba(79,127,196,0.05), transparent 46%); --cast-accent: {{ accent }}; --cast-accent-soft: {{ accentSoft }};">
+
+  <aside style="width:252px; flex:none; display:flex; flex-direction:column; gap:28px; padding:22px 18px; background:var(--surface-card); box-shadow:var(--shadow-clay-md); z-index:2;">
+    <div style="display:flex; align-items:center; gap:11px; padding:4px 6px;">
+      <div style="width:38px; height:38px; border-radius:12px; flex:none; display:flex; align-items:center; justify-content:center; background:var(--cast-accent, #C2693F); box-shadow:var(--shadow-clay-sm);">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#FFF6EF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M5 21h14"></path></svg>
+      </div>
+      <span style="font-family:var(--font-display); font-weight:600; font-size:21px; color:var(--text-strong); letter-spacing:-0.01em; margin-right:auto;">Cast</span>
+      <x-import component-from-global-scope="KilnDesignSystem_77e262.Badge" variant="brand" hint-size="auto,20px">beta</x-import>
+    </div>
+
+    <nav style="display:flex; flex-direction:column; gap:3px;">
+      <button class="cast-navitem" style="display:flex; align-items:center; gap:12px; padding:11px 13px; border:none; cursor:pointer; text-align:left; font-family:var(--font-body); font-size:15px; font-weight:600; border-radius:14px; background:var(--cast-accent-soft, #F4D6C7); color:var(--brand-soft-fg); box-shadow:var(--shadow-clay-xs);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path><path d="m9 14 2 2 4-4"></path></svg>
+        <span>Convert</span>
+      </button>
+      <button class="cast-navitem" style="display:flex; align-items:center; gap:12px; padding:11px 13px; border:none; cursor:pointer; text-align:left; font-family:var(--font-body); font-size:15px; font-weight:500; border-radius:14px; background:transparent; color:var(--text-muted);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>
+        <span>History</span>
+      </button>
+      <button class="cast-navitem" style="display:flex; align-items:center; gap:12px; padding:11px 13px; border:none; cursor:pointer; text-align:left; font-family:var(--font-body); font-size:15px; font-weight:500; border-radius:14px; background:transparent; color:var(--text-muted);">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <div style="margin-top:auto; display:flex; align-items:center; gap:11px; padding:10px; border-radius:14px; background:var(--clay-100); cursor:pointer;">
+      <div style="width:34px; height:34px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center; background:var(--blue-500); color:#fff; font-family:var(--font-display); font-weight:600; font-size:14px; box-shadow:var(--shadow-clay-xs);">MO</div>
+      <div style="margin-right:auto; min-width:0;">
+        <div style="font-size:13px; font-weight:600; color:var(--text-strong); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Mara Okafor</div>
+        <div style="font-size:11px; color:var(--text-subtle); font-family:var(--font-mono);">acme · pro</div>
+      </div>
+    </div>
+  </aside>
+
+  <main style="flex:1; min-width:0; display:flex; flex-direction:column;">
+    <header style="display:flex; align-items:flex-start; justify-content:space-between; gap:24px; padding:26px 34px 14px; flex:none;">
+      <div>
+        <h1 style="font-family:var(--font-display); font-weight:600; font-size:27px; color:var(--text-strong); margin:0; letter-spacing:-0.02em;">Convert to Markdown</h1>
+        <p style="font-size:14px; color:var(--text-muted); margin:4px 0 0;">Pour any document in. Cast clean, portable Markdown out.</p>
+      </div>
+      <x-import component-from-global-scope="KilnDesignSystem_77e262.Button" variant="secondary" onClick="{{ onViewMd }}" hint-size="auto,40px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        View Markdown
+      </x-import>
+    </header>
+
+    <div style="flex:1; overflow-y:auto; padding:14px 34px 40px;">
+      <div style="display:grid; grid-template-columns: minmax(0,1fr) {{ railCol }}; gap:24px; align-items:start; max-width:1180px;">
+
+        <x-import component-from-global-scope="KilnDesignSystem_77e262.Card" hint-size="100%,420px">
+          <div style="display:flex; flex-direction:column; gap:20px;">
+
+            <sc-if value="{{ isIdle }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <input type="file" ref="{{ fileInputRef }}" onChange="{{ onFileChange }}" accept=".pdf,.docx,.pptx,.html,.htm,.txt,.md,.markdown,.png,.jpg,.jpeg" style="display:none;">
+                <div class="cast-drop" onClick="{{ onBrowse }}" onDragOver="{{ onDragOver }}" onDragLeave="{{ onDragLeave }}" onDrop="{{ onDrop }}" style="border:2px dashed var(--border-strong); border-radius:var(--radius-lg); padding:52px 32px; text-align:center; cursor:pointer; background:var(--surface-sunken); transition:border-color var(--dur-base) var(--ease-out), background-color var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-clay);">
+                  <div style="display:flex; flex-direction:column; align-items:center; gap:14px; pointer-events:none;">
+                    <div style="width:62px; height:62px; border-radius:18px; display:flex; align-items:center; justify-content:center; background:var(--surface-raised); color:var(--cast-accent, #C2693F); box-shadow:var(--shadow-clay-sm);">
+                      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13v8"></path><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"></path><path d="m8 17 4-4 4 4"></path></svg>
+                    </div>
+                    <div>
+                      <div style="font-family:var(--font-display); font-weight:600; font-size:18px; color:var(--text-strong);">Drop a document to begin</div>
+                      <div style="font-size:14px; color:var(--text-muted); margin-top:3px;">or click to browse your files</div>
+                    </div>
+                  </div>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:18px;">
+                  <sc-for list="{{ formats }}" as="fmt" hint-placeholder-count="6">
+                    <span style="font-family:var(--font-mono); font-size:11px; font-weight:500; letter-spacing:0.02em; color:var(--text-muted); background:var(--clay-100); padding:4px 10px; border-radius:var(--radius-pill);">{{ fmt }}</span>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isStaged }}" hint-placeholder-val="{{ false }}">
+              <div style="animation:castIn var(--dur-base) var(--ease-out);">
+                <div style="display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius:var(--radius-md); background:var(--surface-sunken); box-shadow:var(--shadow-clay-pressed);">
+                  <div style="width:46px; height:46px; flex:none; border-radius:12px; display:flex; align-items:center; justify-content:center; background:var(--cast-accent, #C2693F); color:#FFF6EF; box-shadow:var(--shadow-clay-xs);">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"></path><path d="M14 2v5h5"></path></svg>
+                  </div>
+                  <div style="margin-right:auto; min-width:0;">
+                    <div style="font-weight:600; font-size:15px; color:var(--text-strong); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ fileName }}</div>
+                    <div style="font-size:13px; color:var(--text-subtle); font-family:var(--font-mono); margin-top:2px;">{{ fileMeta }}</div>
+                  </div>
+                  <button class="cast-iconbtn" onClick="{{ onRemove }}" aria-label="Remove file" style="width:34px; height:34px; flex:none; border:none; cursor:pointer; border-radius:10px; background:transparent; color:var(--text-subtle); display:flex; align-items:center; justify-content:center; transition:background-color var(--dur-fast), color var(--dur-fast);">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+                  </button>
+                </div>
+                <div style="margin-top:18px;">
+                  <x-import component-from-global-scope="KilnDesignSystem_77e262.Button" variant="primary" block="true" onClick="{{ onCast }}" hint-size="100%,46px">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"></path><path d="m7 11 5 5 5-5"></path><path d="M5 21h14"></path></svg>
+                    Cast to Markdown
+                  </x-import>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isBusy }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex; flex-direction:column; gap:18px;">
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <x-import component-from-global-scope="KilnDesignSystem_77e262.Spinner" size="sm" hint-size="22px,22px"></x-import>
+                  <div style="min-width:0;">
+                    <div style="font-weight:600; font-size:15px; color:var(--text-strong);">Casting {{ fileName }}</div>
+                    <div style="font-size:13px; color:var(--text-muted); margin-top:1px;">{{ phaseHint }}</div>
+                  </div>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:16px; padding:2px 2px 4px;">
+                  <sc-for list="{{ steps }}" as="st" hint-placeholder-count="5">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span style="width:9px; height:9px; border-radius:50%; flex:none; background:{{ st.dot }};"></span>
+                      <span style="font-size:13px; font-weight:500; color:{{ st.txt }};">{{ st.label }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+              <div style="animation:castIn var(--dur-base) var(--ease-out); display:flex; flex-direction:column; gap:20px;">
+                <div style="display:flex; align-items:center; gap:14px;">
+                  <div style="width:46px; height:46px; flex:none; border-radius:14px; display:flex; align-items:center; justify-content:center; background:var(--success); color:#fff; box-shadow:var(--shadow-clay-sm);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+                  </div>
+                  <div style="margin-right:auto;">
+                    <div style="font-family:var(--font-display); font-weight:600; font-size:18px; color:var(--text-strong);">Markdown is ready</div>
+                    <div style="font-size:13px; color:var(--text-muted); margin-top:2px; font-family:var(--font-mono);">{{ outName }}</div>
+                  </div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                  <sc-for list="{{ stats }}" as="s" hint-placeholder-count="3">
+                    <div style="flex:1; padding:13px 14px; border-radius:var(--radius-md); background:var(--clay-100);">
+                      <div style="font-family:var(--font-display); font-weight:700; font-size:20px; color:var(--text-strong); line-height:1;">{{ s.value }}</div>
+                      <div style="font-size:12px; color:var(--text-subtle); margin-top:5px;">{{ s.label }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                  <x-import component-from-global-scope="KilnDesignSystem_77e262.Button" variant="primary" as="a" href="{{ downloadUrl }}" download="{{ outName }}" hint-size="auto,46px">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg>
+                    Download .md
+                  </x-import>
+                  <x-import component-from-global-scope="KilnDesignSystem_77e262.Button" variant="secondary" onClick="{{ onPreviewResult }}" hint-size="auto,46px">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    Preview
+                  </x-import>
+                  <x-import component-from-global-scope="KilnDesignSystem_77e262.Button" variant="ghost" onClick="{{ onReset }}" hint-size="auto,46px">Convert another</x-import>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ showTerminal }}" hint-placeholder-val="{{ false }}">
+              <div style="border-radius:var(--radius-lg); background:var(--clay-900); box-shadow:var(--shadow-clay-md); overflow:hidden;">
+                <div style="display:flex; align-items:center; gap:10px; padding:11px 16px; background:rgba(255,255,255,0.04); border-bottom:1px solid rgba(255,255,255,0.07);">
+                  <span style="display:flex; gap:6px;">
+                    <span style="width:11px; height:11px; border-radius:50%; background:#D15F45;"></span>
+                    <span style="width:11px; height:11px; border-radius:50%; background:#E0B33D;"></span>
+                    <span style="width:11px; height:11px; border-radius:50%; background:#4E9E57;"></span>
+                  </span>
+                  <span style="font-family:var(--font-mono); font-size:12px; color:var(--clay-300); margin-left:4px;">conversion.log</span>
+                </div>
+                <div ref="{{ termRef }}" class="cast-term" style="padding:14px 18px; max-height:200px; overflow-y:auto; font-family:var(--font-mono); font-size:12.5px; line-height:1.65;">
+                  <sc-for list="{{ logs }}" as="log" hint-placeholder-count="0">
+                    <div style="display:flex; gap:10px; align-items:baseline; padding:1px 0;">
+                      <span style="color:#8A7B62; flex:none;">{{ log.time }}</span>
+                      <span style="width:7px; height:7px; border-radius:50%; flex:none; align-self:center; background:{{ log.dot }};"></span>
+                      <span style="color:#ECE6DA; word-break:break-word;">{{ log.msg }}</span>
+                    </div>
+                  </sc-for>
+                  <sc-if value="{{ isBusy }}" hint-placeholder-val="{{ false }}">
+                    <span style="display:inline-block; width:8px; height:14px; background:var(--terracotta-300); animation:castBlink 1s steps(1) infinite; vertical-align:middle; margin-left:17px;"></span>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-if>
+
+          </div>
+        </x-import>
+
+        <sc-if value="{{ showRecent }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <x-import component-from-global-scope="KilnDesignSystem_77e262.Card" pad="sm" hint-size="100%,260px">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; padding:4px 4px 0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>
+                <span style="font-family:var(--font-display); font-weight:600; font-size:15px; color:var(--text-strong);">Recent</span>
+              </div>
+              <div style="display:flex; flex-direction:column;">
+                <sc-for list="{{ recent }}" as="r" hint-placeholder-count="3">
+                  <button class="cast-recent" onClick="{{ r.open }}" style="display:flex; align-items:center; gap:11px; padding:10px 8px; border:none; background:transparent; cursor:pointer; text-align:left; border-radius:12px; transition:background-color var(--dur-fast);">
+                    <div style="width:30px; height:30px; flex:none; border-radius:9px; display:flex; align-items:center; justify-content:center; background:{{ r.tint }}; color:#fff;">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"></path><path d="M14 2v5h5"></path></svg>
+                    </div>
+                    <div style="min-width:0; margin-right:auto;">
+                      <div style="font-size:13px; font-weight:500; color:var(--text-body); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ r.name }}</div>
+                      <div style="font-size:11px; color:var(--text-subtle); font-family:var(--font-mono); margin-top:1px;">{{ r.time }}</div>
+                    </div>
+                  </button>
+                </sc-for>
+              </div>
+            </x-import>
+
+            <x-import component-from-global-scope="KilnDesignSystem_77e262.Card" pad="sm" hint-size="100%,120px">
+              <div style="display:flex; gap:11px; padding:2px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cast-accent, #C2693F)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none; margin-top:1px;"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"></path></svg>
+                <p style="font-size:13px; line-height:1.55; color:var(--text-muted); margin:0;">Tables, headings, and code blocks are preserved. Images are extracted with generated alt text.</p>
+              </div>
+            </x-import>
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </main>
+
+  <input type="file" ref="{{ mdInputRef }}" onChange="{{ onMdFile }}" accept=".md,.markdown" style="display:none;">
+
+  <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ onScrimClick }}" style="position:fixed; inset:0; z-index:1000; background:rgba(37,31,24,0.42); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:32px; animation:castScrim var(--dur-fast) var(--ease-out);">
+      <div style="width:100%; max-width:780px; max-height:86vh; display:flex; flex-direction:column; background:var(--surface-card); border-radius:var(--radius-xl); box-shadow:var(--shadow-clay-xl); overflow:hidden; animation:castPop var(--dur-base) var(--ease-clay);">
+        <div style="display:flex; align-items:center; gap:14px; padding:18px 24px; border-bottom:1px solid var(--border-soft); flex:none;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"></path><path d="M14 2v5h5"></path></svg>
+          <span style="font-family:var(--font-mono); font-size:14px; color:var(--text-strong); margin-right:auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ modalTitle }}</span>
+          <button class="cast-iconbtn" onClick="{{ onCloseModal }}" aria-label="Close preview" style="width:34px; height:34px; flex:none; border:none; cursor:pointer; border-radius:10px; background:var(--clay-100); color:var(--text-muted); display:flex; align-items:center; justify-content:center; transition:background-color var(--dur-fast), color var(--dur-fast);">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+          </button>
+        </div>
+        <div ref="{{ mdRef }}" class="cast-md" style="padding:28px 32px; overflow-y:auto; flex:1;"></div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:820},&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;terracotta&quot;,&quot;blue&quot;,&quot;green&quot;],&quot;default&quot;:&quot;terracotta&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;speed&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;calm&quot;,&quot;normal&quot;,&quot;quick&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;showRecent&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      phase: "idle",
+      fileName: "",
+      fileSize: 0,
+      fileExt: "",
+      phaseHint: "",
+      logs: [],
+      steps: [],
+      modalOpen: false,
+      modalTitle: "",
+      previewMd: "",
+      downloadUrl: "",
+      outName: "",
+    };
+    this.fileInputRef = React.createRef();
+    this.mdInputRef = React.createRef();
+    this.mdRef = React.createRef();
+    this.termRef = React.createRef();
+    this._timers = [];
+    this._lastRendered = null;
+    this.STEP_LABELS = ["Upload", "Parse", "Extract text", "Tables & images", "Format"];
+    this.ACCENTS = {
+      terracotta: { c: "#C2693F", soft: "#F4D6C7" },
+      blue: { c: "#4F7FC4", soft: "#DBE7F6" },
+      green: { c: "#4E9E57", soft: "#DCEFDD" },
+    };
+    this.onDragOver = this.onDragOver.bind(this);
+    this.onDragLeave = this.onDragLeave.bind(this);
+    this.onDrop = this.onDrop.bind(this);
+    this.onBrowse = this.onBrowse.bind(this);
+    this.onFileChange = this.onFileChange.bind(this);
+    this.onRemove = this.onRemove.bind(this);
+    this.onCast = this.onCast.bind(this);
+    this.onReset = this.onReset.bind(this);
+    this.onViewMd = this.onViewMd.bind(this);
+    this.onMdFile = this.onMdFile.bind(this);
+    this.onPreviewResult = this.onPreviewResult.bind(this);
+    this.onCloseModal = this.onCloseModal.bind(this);
+    this.onScrimClick = this.onScrimClick.bind(this);
+    this.onKey = this.onKey.bind(this);
+  }
+
+  componentDidMount() {
+    document.addEventListener("keydown", this.onKey);
+  }
+  componentWillUnmount() {
+    this.clearTimers();
+    if (this.state.downloadUrl) URL.revokeObjectURL(this.state.downloadUrl);
+    document.removeEventListener("keydown", this.onKey);
+  }
+  componentDidUpdate() {
+    if (this.state.modalOpen && this.mdRef.current) {
+      if (this._lastRendered !== this.state.previewMd) {
+        this._lastRendered = this.state.previewMd;
+        const md = this.state.previewMd || "";
+        this.mdRef.current.innerHTML = window.marked ? window.marked.parse(md) : md;
+      }
+    } else if (!this.state.modalOpen) {
+      this._lastRendered = null;
+    }
+    if (this.termRef.current) {
+      this.termRef.current.scrollTop = this.termRef.current.scrollHeight;
+    }
+  }
+
+  onKey(e) {
+    if (e.key === "Escape" && this.state.modalOpen) this.closeModal();
+  }
+
+  clearTimers() {
+    this._timers.forEach((t) => clearTimeout(t));
+    this._timers = [];
+  }
+
+  humanSize(bytes) {
+    if (!bytes) return "0 KB";
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return Math.max(1, Math.round(bytes / 1024)) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  }
+
+  onDragOver(e) {
+    e.preventDefault();
+  }
+  onDragLeave(e) {
+    e.preventDefault();
+  }
+  onDrop(e) {
+    e.preventDefault();
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) this.stageFile(f);
+  }
+  onBrowse() {
+    if (this.fileInputRef.current) this.fileInputRef.current.click();
+  }
+  onFileChange(e) {
+    const f = e.target.files && e.target.files[0];
+    if (f) this.stageFile(f);
+    e.target.value = "";
+  }
+
+  stageFile(file) {
+    this.clearTimers();
+    if (this.state.downloadUrl) URL.revokeObjectURL(this.state.downloadUrl);
+    const ext = (file.name.split(".").pop() || "").toUpperCase();
+    this.setState({
+      phase: "staged",
+      fileName: file.name,
+      fileSize: file.size,
+      fileExt: ext,
+      logs: [],
+      steps: [],
+      downloadUrl: "",
+      outName: "",
+    });
+  }
+
+  onRemove() {
+    this.onReset();
+  }
+  onReset() {
+    this.clearTimers();
+    if (this.state.downloadUrl) URL.revokeObjectURL(this.state.downloadUrl);
+    this.setState({ phase: "idle", fileName: "", fileSize: 0, fileExt: "", logs: [], steps: [], downloadUrl: "", outName: "", phaseHint: "" });
+  }
+
+  baseName() {
+    return this.state.fileName.replace(/\.[^.]+$/, "");
+  }
+  outFileName() {
+    return this.baseName() + ".md";
+  }
+
+  pushLog(level, msg) {
+    const now = new Date();
+    const time = now.toLocaleTimeString("en-US", { hour12: false });
+    const dot = { INFO: "#6A9BDC", OK: "#6BB86F", WARN: "#ECC359", ERROR: "#E07B62" }[level] || "#8A7B62";
+    this.setState((s) => ({ logs: s.logs.concat([{ time, level, msg, dot }]) }));
+  }
+  setSteps(activeIdx) {
+    const steps = this.STEP_LABELS.map((label, i) => {
+      let dot = "#574A39", txt = "#8A7B62";
+      if (i < activeIdx) { dot = "#4E9E57"; txt = "var(--text-muted)"; }
+      else if (i === activeIdx) { dot = "var(--cast-accent, #C2693F)"; txt = "var(--text-strong)"; }
+      return { label, dot, txt };
+    });
+    this.setState({ steps });
+  }
+
+  speedMult() {
+    const m = { calm: 1.7, normal: 1, quick: 0.5 };
+    return m[this.props.speed] != null ? m[this.props.speed] : 1;
+  }
+
+  onCast() {
+    this.clearTimers();
+    const mult = this.speedMult();
+    const name = this.state.fileName;
+    this.setState({ phase: "processing", logs: [], phaseHint: "Uploading document…" });
+    this.setSteps(0);
+
+    const seq = [
+      { at: 0, run: () => { this.pushLog("INFO", "Uploading " + name); } },
+      { at: 600, run: () => { this.pushLog("OK", "Upload complete · " + this.humanSize(this.state.fileSize)); this.setSteps(1); this.setState({ phaseHint: "Parsing document structure…" }); this.pushLog("INFO", "Parsing document structure"); } },
+      { at: 1250, run: () => { this.pushLog("INFO", "Detected 4 headings, 2 tables, 3 images"); this.setSteps(2); this.setState({ phaseHint: "Extracting text content…" }); this.pushLog("INFO", "Extracting text content"); } },
+      { at: 1950, run: () => { this.pushLog("OK", "Extracted 1,240 words across 6 sections"); this.setSteps(3); this.setState({ phaseHint: "Reconstructing tables and images…" }); this.pushLog("INFO", "Mapping tables to Markdown grids"); } },
+      { at: 2650, run: () => { this.pushLog("WARN", "2 images missing alt text — generating descriptions"); this.setSteps(4); this.setState({ phaseHint: "Formatting Markdown…" }); this.pushLog("INFO", "Normalizing headings and lists"); } },
+      { at: 3400, run: () => { this.finish(); } },
+    ];
+    seq.forEach((s) => {
+      this._timers.push(setTimeout(s.run, s.at * mult));
+    });
+  }
+
+  finish() {
+    const md = this.buildMarkdown(this.baseName());
+    const blob = new Blob([md], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    this.pushLog("OK", "Conversion complete → " + this.outFileName());
+    this.setSteps(99);
+    this.setState({ phase: "done", previewMd: md, downloadUrl: url, outName: this.outFileName(), phaseHint: "" });
+  }
+
+  onViewMd() {
+    if (this.mdInputRef.current) this.mdInputRef.current.click();
+  }
+  onMdFile(e) {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      this.openModal(f.name, ev.target.result || "");
+    };
+    reader.readAsText(f);
+    e.target.value = "";
+  }
+  onPreviewResult() {
+    this.openModal(this.state.outName, this.state.previewMd);
+  }
+  openModal(title, md) {
+    this._lastRendered = null;
+    this.setState({ modalOpen: true, modalTitle: title, previewMd: md });
+  }
+  onCloseModal() {
+    this.closeModal();
+  }
+  onScrimClick(e) {
+    if (e.target === e.currentTarget) this.closeModal();
+  }
+  closeModal() {
+    this.setState({ modalOpen: false });
+  }
+
+  buildMarkdown(title) {
+    return [
+      "# " + title,
+      "",
+      "> Converted from your source document by Cast — structure, tables, and code preserved.",
+      "",
+      "## Overview",
+      "",
+      "This document was reconstructed into clean, portable Markdown. Headings map to native heading levels, lists keep their nesting, and inline emphasis such as **bold** and *italic* carries across faithfully.",
+      "",
+      "Cast reads the layout of the original file and rebuilds the semantic structure rather than copying raw text, so the result stays readable in any Markdown editor.",
+      "",
+      "## Key results",
+      "",
+      "- Six sections detected and ordered correctly",
+      "- Two tables rebuilt as Markdown grids",
+      "- Three images extracted with generated alt text",
+      "- Footnotes and links preserved inline",
+      "",
+      "## Comparison",
+      "",
+      "| Capability | Source file | Markdown output |",
+      "| --- | --- | --- |",
+      "| Headings | Visual styles | Native `#` levels |",
+      "| Tables | Fixed layout | Portable grids |",
+      "| Images | Embedded | Linked + alt text |",
+      "| Code | Monospace run | Fenced blocks |",
+      "",
+      "## Code blocks",
+      "",
+      "Fenced code is detected by font and indentation, then tagged with a best-guess language:",
+      "",
+      "```bash",
+      "npx @kiln/cli convert ./report.pdf -o ./report.md",
+      "```",
+      "",
+      "## Notes",
+      "",
+      "Anything Cast was unsure about is flagged in the conversion log rather than dropped silently, so you always know what to review.",
+      "",
+      "---",
+      "",
+      "*Generated with Cast · part of the Kiln workshop.*",
+      "",
+    ].join("\n");
+  }
+
+  renderVals() {
+    const phase = this.state.phase;
+    const acc = this.ACCENTS[this.props.accent] || this.ACCENTS.terracotta;
+    const showRecent = this.props.showRecent !== false;
+    const tints = ["#4F7FC4", "#4E9E57", "#E0B33D"];
+    const recentData = [
+      { name: "Q3-strategy-deck.pptx", time: "2 hours ago" },
+      { name: "onboarding-guide.docx", time: "yesterday" },
+      { name: "research-paper.pdf", time: "Mon" },
+    ];
+    const recent = recentData.map((r, i) => ({
+      name: r.name,
+      time: r.time,
+      tint: tints[i % tints.length],
+      open: () => this.openModal(r.name.replace(/\.[^.]+$/, "") + ".md", this.buildMarkdown(r.name.replace(/\.[^.]+$/, ""))),
+    }));
+
+    return {
+      accent: acc.c,
+      accentSoft: acc.soft,
+      isIdle: phase === "idle",
+      isStaged: phase === "staged",
+      isBusy: phase === "processing",
+      isDone: phase === "done",
+      showTerminal: phase === "processing" || phase === "done",
+      showRecent,
+      railCol: showRecent ? "300px" : "0px",
+      fileName: this.state.fileName,
+      fileMeta: this.state.fileExt + " · " + this.humanSize(this.state.fileSize),
+      phaseHint: this.state.phaseHint,
+      formats: ["PDF", "DOCX", "PPTX", "HTML", "TXT", "Images"],
+      logs: this.state.logs,
+      steps: this.state.steps,
+      stats: [
+        { value: "1,240", label: "words" },
+        { value: "3", label: "images" },
+        { value: "28 KB", label: "size" },
+      ],
+      outName: this.state.outName,
+      downloadUrl: this.state.downloadUrl,
+      recent,
+      modalOpen: this.state.modalOpen,
+      modalTitle: this.state.modalTitle,
+      fileInputRef: this.fileInputRef,
+      mdInputRef: this.mdInputRef,
+      mdRef: this.mdRef,
+      termRef: this.termRef,
+      onDragOver: this.onDragOver,
+      onDragLeave: this.onDragLeave,
+      onDrop: this.onDrop,
+      onBrowse: this.onBrowse,
+      onFileChange: this.onFileChange,
+      onRemove: this.onRemove,
+      onCast: this.onCast,
+      onReset: this.onReset,
+      onViewMd: this.onViewMd,
+      onMdFile: this.onMdFile,
+      onPreviewResult: this.onPreviewResult,
+      onCloseModal: this.onCloseModal,
+      onScrimClick: this.onScrimClick,
+    };
+  }
+}
+</script>
+</body>
+</html>

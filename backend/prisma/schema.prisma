@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PATIENT
+  CAREGIVER
+}
+
+enum RecurrenceRule {
+  none
+  daily
+  weekly
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  caregiverLinks CaregiverPatientLink[] @relation("CaregiverLinks")
+  patientLinks   CaregiverPatientLink[] @relation("PatientLinks")
+
+  remindersForSelf    Reminder[] @relation("PatientReminders")
+  remindersCreated    Reminder[] @relation("CreatedReminders")
+
+  messagesSent     Message[] @relation("SentMessages")
+  messagesReceived Message[] @relation("ReceivedMessages")
+
+  aiEvaluationsRequested AiEvaluation[] @relation("RequestedEvaluations")
+}
+
+model CaregiverPatientLink {
+  id          String   @id @default(cuid())
+  caregiverId String
+  patientId   String
+  createdAt   DateTime @default(now())
+
+  caregiver User @relation("CaregiverLinks", fields: [caregiverId], references: [id], onDelete: Cascade)
+  patient   User @relation("PatientLinks", fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@unique([caregiverId, patientId])
+}
+
+model Reminder {
+  id             String          @id @default(cuid())
+  patientId      String
+  createdById    String
+  title          String
+  body           String?
+  dueAt          DateTime
+  recurrenceRule RecurrenceRule  @default(none)
+  completed      Boolean         @default(false)
+  completedAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  patient   User @relation("PatientReminders", fields: [patientId], references: [id], onDelete: Cascade)
+  createdBy User @relation("CreatedReminders", fields: [createdById], references: [id], onDelete: Cascade)
+
+  aiEvaluations AiEvaluation[]
+
+  @@index([patientId])
+}
+
+model Message {
+  id        String    @id @default(cuid())
+  senderId  String
+  patientId String
+  body      String
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
+
+  sender  User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  patient User @relation("ReceivedMessages", fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@index([patientId])
+}
+
+model AiEvaluation {
+  id            String   @id @default(cuid())
+  reminderId    String
+  requestedById String
+  resultJson    String
+  modelName     String
+  createdAt     DateTime @default(now())
+
+  reminder    Reminder @relation(fields: [reminderId], references: [id], onDelete: Cascade)
+  requestedBy User     @relation("RequestedEvaluations", fields: [requestedById], references: [id], onDelete: Cascade)
+
+  @@index([reminderId])
+}
