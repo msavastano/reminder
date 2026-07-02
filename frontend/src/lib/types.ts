@@ -9,10 +9,17 @@ export interface User {
 
 export type RecurrenceRule = "none" | "daily" | "weekly";
 
+export interface UserRef {
+  id: string;
+  name: string;
+  role: Role;
+}
+
 export interface Reminder {
   id: string;
   patientId: string;
   createdById: string;
+  createdBy?: UserRef;
   title: string;
   body: string | null;
   dueAt: string;
@@ -26,6 +33,7 @@ export interface Reminder {
 export interface Message {
   id: string;
   senderId: string;
+  sender?: UserRef;
   patientId: string;
   body: string;
   createdAt: string;
@@ -53,8 +61,25 @@ export interface AiReminderSummary {
   steps: string[];
 }
 
+export type LinkStatus = "PENDING" | "ACCEPTED";
+
 export interface LinkedPatient {
   patientId: string;
   name: string;
   email: string;
+  status: LinkStatus;
+}
+
+export interface LinkedCaregiver {
+  caregiverId: string;
+  name: string;
+  email: string;
+}
+
+export interface CaregiverInvite {
+  inviteId: string;
+  caregiverId: string;
+  caregiverName: string;
+  caregiverEmail: string;
+  invitedAt: string;
 }

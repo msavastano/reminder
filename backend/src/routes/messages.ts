@@ -8,6 +8,7 @@ router.get("/patients/:patientId/messages", requireAuth, requireSelfOrCaregiverO
   const messages = await prisma.message.findMany({
     where: { patientId: req.params.patientId },
     orderBy: { createdAt: "asc" },
+    include: { sender: { select: { id: true, name: true, role: true } } },
   });
   res.json({ messages });
 });
@@ -25,6 +26,7 @@ router.post(
     }
     const message = await prisma.message.create({
       data: { senderId: req.user!.id, patientId: req.params.patientId, body: body.trim() },
+      include: { sender: { select: { id: true, name: true, role: true } } },
     });
     res.status(201).json({ message });
   },
@@ -43,6 +45,7 @@ router.patch("/messages/:id/read", requireAuth, requireRole("PATIENT"), async (r
   const updated = await prisma.message.update({
     where: { id: message.id },
     data: { readAt: message.readAt ?? new Date() },
+    include: { sender: { select: { id: true, name: true, role: true } } },
   });
   res.json({ message: updated });
 });

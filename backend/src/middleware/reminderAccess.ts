@@ -30,7 +30,7 @@ export async function requireAccessToReminder(req: Request, res: Response, next:
     const link = await prisma.caregiverPatientLink.findUnique({
       where: { caregiverId_patientId: { caregiverId: req.user.id, patientId: reminder.patientId } },
     });
-    if (!link) {
+    if (!link || link.status !== "ACCEPTED") {
       res.status(403).json({ error: "Not linked to this patient" });
       return;
     }

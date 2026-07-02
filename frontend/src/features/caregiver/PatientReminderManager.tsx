@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useOutletContext, useParams } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import { Card } from "../../components/Card";
 import { Button } from "../../components/Button";
 import { Input } from "../../components/Input";
@@ -20,6 +21,7 @@ interface FormState {
 const EMPTY_FORM: FormState = { title: "", body: "", when: "", recurrenceRule: "none" };
 
 export function PatientReminderManager() {
+  const { user } = useAuth();
   const { patientId } = useParams<{ patientId: string }>();
   const patients = useOutletContext<LinkedPatient[]>();
   const patient = patients?.find((p) => p.patientId === patientId);
@@ -164,7 +166,19 @@ export function PatientReminderManager() {
                   {r.recurrenceRule !== "none" && <Badge variant="neutral">{r.recurrenceRule}</Badge>}
                 </div>
                 {r.body && <span className="manager-row-body">{r.body}</span>}
-                <span className="manager-row-due">{formatFriendlyDateTime(r.dueAt)}</span>
+                <span className="manager-row-due">
+                  {formatFriendlyDateTime(r.dueAt)}
+                  {r.createdBy && (
+                    <span className="sender-chip">
+                      added by{" "}
+                      {r.createdById === user?.id
+                        ? "you"
+                        : r.createdById === patientId
+                          ? patient?.name.split(" ")[0] ?? "patient"
+                          : r.createdBy.name.split(" ")[0]}
+                    </span>
+                  )}
+                </span>
               </div>
               <div className="manager-row-actions">
                 <Button variant="ghost" size="md" onClick={() => setAskAiFor(askAiFor === r.id ? null : r.id)}>

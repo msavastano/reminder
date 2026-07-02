@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { Card } from "../../components/Card";
 import { Button } from "../../components/Button";
 import { messagesApi } from "../../lib/messagesApi";
@@ -10,6 +11,7 @@ interface MessageComposerProps {
 }
 
 export function MessageComposer({ patientId }: MessageComposerProps) {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [body, setBody] = useState("");
   const [sending, setSending] = useState(false);
@@ -40,6 +42,9 @@ export function MessageComposer({ patientId }: MessageComposerProps) {
           <div key={m.id} className="composer-message">
             <span className="composer-message-body">{m.body}</span>
             <span className="composer-message-meta">
+              {m.sender && (
+                <span className="sender-chip">{m.senderId === user?.id ? "you" : m.sender.name.split(" ")[0]}</span>
+              )}
               {formatFriendlyDateTime(m.createdAt)} · {m.readAt ? "Read" : "Unread"}
             </span>
           </div>

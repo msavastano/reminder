@@ -32,6 +32,7 @@ export function MessagesPanel({ patientId, refreshKey }: MessagesPanelProps) {
           <div className="message-row-text">
             <span className="message-row-body">{m.body}</span>
             <span className="message-row-time">
+              {m.sender && <span className="sender-chip">{m.sender.name.split(" ")[0]}</span>}
               {formatFriendlyDateTime(m.createdAt)}
               {!m.readAt && <span className="message-new-label">NEW</span>}
             </span>

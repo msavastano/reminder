@@ -54,7 +54,7 @@ export async function requireCaregiverOwnsPatient(req: Request, res: Response, n
   const link = await prisma.caregiverPatientLink.findUnique({
     where: { caregiverId_patientId: { caregiverId: req.user.id, patientId } },
   });
-  if (!link) {
+  if (!link || link.status !== "ACCEPTED") {
     res.status(403).json({ error: "Not linked to this patient" });
     return;
   }
@@ -92,7 +92,7 @@ export async function requireSelfOrCaregiverOwnsPatient(req: Request, res: Respo
   const link = await prisma.caregiverPatientLink.findUnique({
     where: { caregiverId_patientId: { caregiverId: req.user.id, patientId } },
   });
-  if (!link) {
+  if (!link || link.status !== "ACCEPTED") {
     res.status(403).json({ error: "Not linked to this patient" });
     return;
   }

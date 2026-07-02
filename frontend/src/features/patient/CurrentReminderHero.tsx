@@ -62,7 +62,12 @@ export function CurrentReminderHero({ patientId, refreshKey, onCompleted }: Curr
 
   return (
     <Card className="hero-card" pad="lg">
-      <div className="hero-due">{formatFriendlyDateTime(reminder.dueAt)}</div>
+      <div className="hero-due">
+        {formatFriendlyDateTime(reminder.dueAt)}
+        {reminder.createdBy && reminder.createdById !== patientId && (
+          <span className="sender-chip">from {reminder.createdBy.name.split(" ")[0]}</span>
+        )}
+      </div>
       <h1 className="hero-title">{reminder.title}</h1>
       {reminder.body && <p className="hero-body">{reminder.body}</p>}
       <Button size="xl" block onClick={handleComplete} disabled={completing}>

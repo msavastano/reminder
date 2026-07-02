@@ -27,6 +27,24 @@ async function main() {
     },
   });
 
+  const caregiver2 = await prisma.user.create({
+    data: {
+      email: "caregiver2@example.com",
+      passwordHash,
+      name: "Priya Nair",
+      role: "CAREGIVER",
+    },
+  });
+
+  const caregiver3 = await prisma.user.create({
+    data: {
+      email: "caregiver3@example.com",
+      passwordHash,
+      name: "Jordan Blake",
+      role: "CAREGIVER",
+    },
+  });
+
   const patient1 = await prisma.user.create({
     data: {
       email: "patient1@example.com",
@@ -45,10 +63,28 @@ async function main() {
     },
   });
 
+  // A patient who has an account but hasn't been through onboarding yet:
+  // one pending invite from Jordan, nothing accepted.
+  const patient3 = await prisma.user.create({
+    data: {
+      email: "patient3@example.com",
+      passwordHash,
+      name: "Ellis Ward",
+      role: "PATIENT",
+    },
+  });
+
   await prisma.caregiverPatientLink.createMany({
     data: [
-      { caregiverId: caregiver.id, patientId: patient1.id },
-      { caregiverId: caregiver.id, patientId: patient2.id },
+      // Mara has two accepted caregivers (multi-caregiver experience)...
+      { caregiverId: caregiver.id, patientId: patient1.id, status: "ACCEPTED", acceptedAt: hoursFromNow(-72) },
+      { caregiverId: caregiver2.id, patientId: patient1.id, status: "ACCEPTED", acceptedAt: hoursFromNow(-48) },
+      // ...and a pending invite from Jordan she can accept in-app.
+      { caregiverId: caregiver3.id, patientId: patient1.id, status: "PENDING" },
+      // Sam has one accepted caregiver.
+      { caregiverId: caregiver.id, patientId: patient2.id, status: "ACCEPTED", acceptedAt: hoursFromNow(-96) },
+      // Ellis has only a pending invite — lands on the onboarding screen.
+      { caregiverId: caregiver3.id, patientId: patient3.id, status: "PENDING" },
     ],
   });
 
@@ -64,7 +100,7 @@ async function main() {
       },
       {
         patientId: patient1.id,
-        createdById: caregiver.id,
+        createdById: caregiver2.id,
         title: "Drink a glass of water",
         body: "Stay hydrated — a full glass, please.",
         dueAt: hoursFromNow(1),
@@ -77,6 +113,15 @@ async function main() {
         title: "Call Grandma Rose",
         body: "She loves hearing from you on Tuesdays.",
         dueAt: hoursFromNow(5),
+        completed: false,
+      },
+      {
+        patientId: patient1.id,
+        createdById: caregiver2.id,
+        title: "Blood pressure check",
+        body: "Use the arm cuff, sitting down, before dinner.",
+        dueAt: hoursFromNow(9),
+        recurrenceRule: "daily",
         completed: false,
       },
       {
@@ -133,9 +178,20 @@ async function main() {
         readAt: hoursFromNow(-20),
       },
       {
+        senderId: caregiver2.id,
+        patientId: patient1.id,
+        body: "Hi Mara, it's Priya — I added a blood pressure check to your reminders.",
+        readAt: hoursFromNow(-15),
+      },
+      {
         senderId: caregiver.id,
         patientId: patient1.id,
         body: "Don't forget your PT appointment tomorrow — I'll drive you.",
+      },
+      {
+        senderId: caregiver2.id,
+        patientId: patient1.id,
+        body: "Your readings looked great this week. Keep it up!",
       },
       {
         senderId: caregiver.id,
@@ -157,9 +213,12 @@ async function main() {
   });
 
   console.log("Seed complete. Log in with:");
-  console.log(`  Caregiver: ${caregiver.email} / ${DEV_PASSWORD}`);
-  console.log(`  Patient 1: ${patient1.email} / ${DEV_PASSWORD}`);
-  console.log(`  Patient 2: ${patient2.email} / ${DEV_PASSWORD}`);
+  console.log(`  Caregiver 1: ${caregiver.email} / ${DEV_PASSWORD} (patients: Mara, Sam)`);
+  console.log(`  Caregiver 2: ${caregiver2.email} / ${DEV_PASSWORD} (patients: Mara)`);
+  console.log(`  Caregiver 3: ${caregiver3.email} / ${DEV_PASSWORD} (pending invites to Mara, Ellis)`);
+  console.log(`  Patient 1:   ${patient1.email} / ${DEV_PASSWORD} (two caregivers + one pending invite)`);
+  console.log(`  Patient 2:   ${patient2.email} / ${DEV_PASSWORD} (one caregiver)`);
+  console.log(`  Patient 3:   ${patient3.email} / ${DEV_PASSWORD} (not onboarded — pending invite only)`);
 }
 
 main()

@@ -20,7 +20,11 @@ router.get("/patients/:patientId/reminders", requireAuth, requireSelfOrCaregiver
     where.OR = [{ title: { contains: search } }, { body: { contains: search } }];
   }
 
-  const reminders = await prisma.reminder.findMany({ where, orderBy: { dueAt: "asc" } });
+  const reminders = await prisma.reminder.findMany({
+    where,
+    orderBy: { dueAt: "asc" },
+    include: { createdBy: { select: { id: true, name: true, role: true } } },
+  });
   res.json({ reminders });
 });
 
@@ -35,6 +39,7 @@ router.get(
     const overdue = await prisma.reminder.findFirst({
       where: { patientId, completed: false, dueAt: { lte: now } },
       orderBy: { dueAt: "desc" },
+      include: { createdBy: { select: { id: true, name: true, role: true } } },
     });
     if (overdue) {
       res.json({ reminder: overdue });
@@ -44,6 +49,7 @@ router.get(
     const upcoming = await prisma.reminder.findFirst({
       where: { patientId, completed: false, dueAt: { gt: now } },
       orderBy: { dueAt: "asc" },
+      include: { createdBy: { select: { id: true, name: true, role: true } } },
     });
     res.json({ reminder: upcoming ?? null });
   },
@@ -76,6 +82,7 @@ router.post("/patients/:patientId/reminders", requireAuth, requireSelfOrCaregive
       dueAt: parsedDueAt,
       recurrenceRule: recurrenceRule ?? "none",
     },
+    include: { createdBy: { select: { id: true, name: true, role: true } } },
   });
   res.status(201).json({ reminder });
 });
@@ -108,7 +115,11 @@ router.patch("/reminders/:id", requireAuth, requireAccessToReminder, async (req,
     data.recurrenceRule = recurrenceRule;
   }
 
-  const updated = await prisma.reminder.update({ where: { id: req.reminder!.id }, data });
+  const updated = await prisma.reminder.update({
+    where: { id: req.reminder!.id },
+    data,
+    include: { createdBy: { select: { id: true, name: true, role: true } } },
+  });
   res.json({ reminder: updated });
 });
 
@@ -121,6 +132,7 @@ router.patch("/reminders/:id/complete", requireAuth, requireAccessToReminder, as
   const updated = await prisma.reminder.update({
     where: { id: req.reminder!.id },
     data: { completed, completedAt: completed ? new Date() : null },
+    include: { createdBy: { select: { id: true, name: true, role: true } } },
   });
   res.json({ reminder: updated });
 });

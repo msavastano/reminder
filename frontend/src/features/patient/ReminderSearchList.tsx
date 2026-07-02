@@ -46,7 +46,12 @@ export function ReminderSearchList({ patientId, refreshKey, onChanged }: Reminde
             <input type="checkbox" checked={r.completed} onChange={() => toggle(r)} />
             <div className="search-list-row-text">
               <span className="search-list-row-title">{r.title}</span>
-              <span className="search-list-row-due">{formatFriendlyDateTime(r.dueAt)}</span>
+              <span className="search-list-row-due">
+                {formatFriendlyDateTime(r.dueAt)}
+                {r.createdBy && r.createdById !== patientId && (
+                  <span className="sender-chip">from {r.createdBy.name.split(" ")[0]}</span>
+                )}
+              </span>
             </div>
           </label>
         ))}

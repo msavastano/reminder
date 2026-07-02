@@ -18,6 +18,11 @@ enum RecurrenceRule {
   weekly
 }
 
+enum LinkStatus {
+  PENDING
+  ACCEPTED
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -40,10 +45,12 @@ model User {
 }
 
 model CaregiverPatientLink {
-  id          String   @id @default(cuid())
+  id          String     @id @default(cuid())
   caregiverId String
   patientId   String
-  createdAt   DateTime @default(now())
+  status      LinkStatus @default(PENDING)
+  createdAt   DateTime   @default(now())
+  acceptedAt  DateTime?
 
   caregiver User @relation("CaregiverLinks", fields: [caregiverId], references: [id], onDelete: Cascade)
   patient   User @relation("PatientLinks", fields: [patientId], references: [id], onDelete: Cascade)

@@ -836,3 +836,134 @@ a {
     max-width: none;
   }
 }
+
+/* Sender / creator attribution — subtle chip next to timestamps */
+.sender-chip {
+  display: inline-block;
+  padding: 1px 8px;
+  margin-right: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--clay-100);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+  vertical-align: middle;
+}
+.hero-due .sender-chip {
+  margin-left: 10px;
+  margin-right: 0;
+  font-size: 13px;
+}
+
+/* Patient onboarding — waiting for a caregiver invite */
+.onboarding-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+.onboarding-body {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: var(--space-6);
+}
+.onboarding-card {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+  box-shadow: var(--shadow-clay-xl);
+}
+.onboarding-tile {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+.onboarding-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 30px;
+  color: var(--text-strong);
+}
+.onboarding-subtitle {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+/* Caregiver invites shown to the patient */
+.invite-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--clay-100);
+}
+.invite-row-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.invite-row-name {
+  font-weight: 600;
+  color: var(--text-strong);
+}
+.invite-row-email {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.invite-row-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+.invite-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--brand-soft);
+  color: var(--brand-soft-fg);
+}
+.invite-banner-text {
+  font-size: 15px;
+}
+
+/* Caregiver rail — patient invited but not yet accepted */
+.patient-rail-item-pending {
+  opacity: 0.65;
+  cursor: default;
+}
+.patient-rail-item-pending:hover {
+  background: transparent;
+}
+.patient-rail-status {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--clay-100);
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+}

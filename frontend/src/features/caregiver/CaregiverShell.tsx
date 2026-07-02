@@ -28,12 +28,12 @@ export function CaregiverShell() {
     setAddError(null);
     setSubmitting(true);
     try {
-      await caregiverApi.linkPatient(email.trim());
+      await caregiverApi.invitePatient(email.trim());
       setEmail("");
       setAddOpen(false);
       refresh();
     } catch (err) {
-      setAddError(err instanceof ApiError ? err.message : "Could not link that patient.");
+      setAddError(err instanceof ApiError ? err.message : "Could not invite that patient.");
     } finally {
       setSubmitting(false);
     }
@@ -44,16 +44,24 @@ export function CaregiverShell() {
       <aside className="caregiver-rail">
         <div className="caregiver-rail-header">Reminder</div>
         <nav className="patient-rail-list">
-          {patients.map((p) => (
-            <NavLink
-              key={p.patientId}
-              to={`/caregiver/${p.patientId}`}
-              className={({ isActive }) => `patient-rail-item ${isActive ? "patient-rail-item-active" : ""}`}
-            >
-              <span className="patient-rail-avatar">{p.name.charAt(0)}</span>
-              <span className="patient-rail-name">{p.name}</span>
-            </NavLink>
-          ))}
+          {patients.map((p) =>
+            p.status === "ACCEPTED" ? (
+              <NavLink
+                key={p.patientId}
+                to={`/caregiver/${p.patientId}`}
+                className={({ isActive }) => `patient-rail-item ${isActive ? "patient-rail-item-active" : ""}`}
+              >
+                <span className="patient-rail-avatar">{p.name.charAt(0)}</span>
+                <span className="patient-rail-name">{p.name}</span>
+              </NavLink>
+            ) : (
+              <div key={p.patientId} className="patient-rail-item patient-rail-item-pending" title="Waiting for the patient to accept your invite">
+                <span className="patient-rail-avatar">{p.name.charAt(0)}</span>
+                <span className="patient-rail-name">{p.name}</span>
+                <span className="patient-rail-status">Invited</span>
+              </div>
+            ),
+          )}
         </nav>
 
         {addOpen ? (
@@ -69,7 +77,7 @@ export function CaregiverShell() {
             {addError && <p className="auth-error">{addError}</p>}
             <div className="quick-add-actions">
               <Button type="submit" size="md" disabled={submitting}>
-                {submitting ? "Linking…" : "Link"}
+                {submitting ? "Inviting…" : "Invite"}
               </Button>
               <Button type="button" variant="ghost" size="md" onClick={() => setAddOpen(false)}>
                 Cancel
@@ -78,7 +86,7 @@ export function CaregiverShell() {
           </form>
         ) : (
           <button className="add-patient-trigger" onClick={() => setAddOpen(true)}>
-            + Add patient
+            + Invite patient
           </button>
         )}
 
