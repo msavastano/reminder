@@ -5,3 +5,6 @@ dist/
 *.db
 *.db-journal
 .claude/
+
+.vercel
+.env*
