@@ -9,6 +9,9 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:4000',
         changeOrigin: true,
+        // Mirrors Vercel's Services routing, which strips the "/api"
+        // routePrefix before forwarding to the backend service.
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },

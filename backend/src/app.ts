@@ -16,14 +16,17 @@ if (process.env.NODE_ENV === "development") {
   app.use(cors({ origin: true, credentials: true }));
 }
 
-app.get("/api/health", (_req, res) => {
+// Vercel's Services routing strips the "/api" routePrefix before forwarding
+// here, so these routes are defined without it. Locally, the Vite dev proxy
+// (frontend/vite.config.ts) strips the same prefix to match.
+app.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
 
-app.use("/api/auth", authRouter);
-app.use("/api", remindersRouter);
-app.use("/api", caregiverPatientsRouter);
-app.use("/api", messagesRouter);
-app.use("/api", aiRouter);
+app.use("/auth", authRouter);
+app.use("/", remindersRouter);
+app.use("/", caregiverPatientsRouter);
+app.use("/", messagesRouter);
+app.use("/", aiRouter);
 
 export default app;
