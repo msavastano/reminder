@@ -55,15 +55,46 @@ without a custom dev build.
 Screens are ported incrementally; reminder create/edit, messaging, and the AI
 panels are not in this slice.
 
-## Build & distribution (not configured yet)
+## Build & distribution (EAS — Windows/PowerShell)
 
-iOS binaries are built in the cloud via **EAS Build** (no macOS needed):
+iOS binaries are built in the cloud via **EAS Build** — no macOS/Xcode needed.
+`eas.json` defines three profiles:
+
+- **development** — internal dev-client build (`expo-dev-client`) for on-device
+  debugging against a LAN backend. Points `EXPO_PUBLIC_API_URL` at your dev
+  machine's LAN IP (edit it in `eas.json`).
+- **preview** — internal distribution (ad-hoc / TestFlight-style) against the
+  deployed Vercel API.
+- **production** — App Store build, `autoIncrement` on, against the Vercel API.
+
+One-time setup:
 
 ```powershell
 npm install -g eas-cli
-eas build --platform ios --profile preview
-eas submit --platform ios
+eas login                      # your Expo account
+eas init                       # links the project, writes extra.eas.projectId
 ```
 
-`eas.json` (development/preview/production profiles) and an Apple Developer
-account are required before the first `eas build` — deferred to a later step.
+Fill in the real values before building/submitting:
+
+- In `eas.json`, replace the `your-app.vercel.app` URLs and the `REPLACE_WITH_*`
+  submit fields (`appleId`, `ascAppId`, `appleTeamId`). EAS can also manage these
+  interactively at submit time instead of storing them here.
+
+Build & submit:
+
+```powershell
+# On-device dev build (install once, then use the Metro dev server)
+eas build --platform ios --profile development
+
+# Shareable internal build
+eas build --platform ios --profile preview
+
+# App Store build + submission (EAS manages signing/certificates)
+eas build --platform ios --profile production
+eas submit --platform ios --profile production
+```
+
+Requires an **Apple Developer account** (you have one). EAS handles certificates
+and provisioning profiles; you'll authenticate with Apple when prompted (or via
+`eas credentials`).
