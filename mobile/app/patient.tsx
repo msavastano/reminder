@@ -3,9 +3,10 @@ import { Link, Redirect } from "expo-router";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { QuickAddReminder } from "../src/components/QuickAddReminder";
 import { useAuth } from "../src/context/AuthContext";
+import { patientLinksApi } from "../src/lib/api/caregiver";
 import { remindersApi, type CreateReminderInput } from "../src/lib/api/reminders";
 import { formatFriendlyDateTime } from "../src/lib/dateFormat";
-import type { Reminder } from "../src/lib/types";
+import type { CaregiverInvite, Reminder } from "../src/lib/types";
 import { colors, radius, space } from "../src/theme";
 
 export default function PatientHome() {
@@ -32,8 +33,27 @@ export default function PatientHome() {
     onSuccess: invalidate,
   });
 
+  const invitesKey = ["patient-invites"];
+  const invitesQuery = useQuery({
+    queryKey: invitesKey,
+    queryFn: () => patientLinksApi.listInvites(),
+    enabled: !!user,
+  });
+  const invalidateInvites = () => queryClient.invalidateQueries({ queryKey: invitesKey });
+  const accept = useMutation({
+    mutationFn: (inviteId: string) => patientLinksApi.acceptInvite(inviteId),
+    onSuccess: invalidateInvites,
+  });
+  const decline = useMutation({
+    mutationFn: (inviteId: string) => patientLinksApi.declineInvite(inviteId),
+    onSuccess: invalidateInvites,
+  });
+
   // Deep-link / logged-out safety.
   if (!user) return <Redirect href="/login" />;
+
+  const invites = invitesQuery.data ?? [];
+  const invitesBusy = accept.isPending || decline.isPending;
 
   return (
     <View style={styles.screen}>
@@ -69,6 +89,14 @@ export default function PatientHome() {
           contentContainerStyle={styles.list}
           ListHeaderComponent={
             <View style={styles.headerBlock}>
+              {invites.length > 0 ? (
+                <InvitesBanner
+                  invites={invites}
+                  onAccept={(id) => accept.mutate(id)}
+                  onDecline={(id) => decline.mutate(id)}
+                  busy={invitesBusy}
+                />
+              ) : null}
               <QuickAddReminder
                 onSubmit={async (input) => {
                   await create.mutateAsync(input);
@@ -84,6 +112,48 @@ export default function PatientHome() {
           onRefresh={() => query.refetch()}
         />
       )}
+    </View>
+  );
+}
+
+function InvitesBanner({
+  invites,
+  onAccept,
+  onDecline,
+  busy,
+}: {
+  invites: CaregiverInvite[];
+  onAccept: (inviteId: string) => void;
+  onDecline: (inviteId: string) => void;
+  busy: boolean;
+}) {
+  return (
+    <View style={styles.invites}>
+      <Text style={styles.invitesTitle}>Caregiver invites</Text>
+      {invites.map((invite) => (
+        <View key={invite.inviteId} style={styles.inviteRow}>
+          <View style={styles.inviteText}>
+            <Text style={styles.inviteName}>{invite.caregiverName}</Text>
+            <Text style={styles.inviteEmail}>{invite.caregiverEmail}</Text>
+          </View>
+          <View style={styles.inviteActions}>
+            <Pressable
+              style={[styles.acceptBtn, busy && styles.btnDisabled]}
+              onPress={() => onAccept(invite.inviteId)}
+              disabled={busy}
+            >
+              <Text style={styles.acceptText}>Accept</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.declineBtn, busy && styles.btnDisabled]}
+              onPress={() => onDecline(invite.inviteId)}
+              disabled={busy}
+            >
+              <Text style={styles.declineText}>Decline</Text>
+            </Pressable>
+          </View>
+        </View>
+      ))}
     </View>
   );
 }
@@ -139,8 +209,38 @@ const styles = StyleSheet.create({
   },
   retryText: { color: colors.textOnBrand, fontWeight: "700" },
   list: { padding: space[5], gap: space[3] },
-  headerBlock: { marginBottom: space[3] },
+  headerBlock: { marginBottom: space[3], gap: space[3] },
   empty: { textAlign: "center", color: colors.textMuted, marginTop: space[8] },
+  invites: {
+    backgroundColor: colors.brandSoft,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.brand,
+    padding: space[4],
+    gap: space[3],
+  },
+  invitesTitle: { fontSize: 15, fontWeight: "700", color: colors.brandSoftFg },
+  inviteRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space[3] },
+  inviteText: { flex: 1 },
+  inviteName: { fontSize: 16, fontWeight: "600", color: colors.textStrong },
+  inviteEmail: { fontSize: 13, color: colors.textMuted },
+  inviteActions: { flexDirection: "row", gap: space[2] },
+  acceptBtn: {
+    backgroundColor: colors.brand,
+    borderRadius: radius.pill,
+    paddingHorizontal: space[4],
+    paddingVertical: space[2],
+  },
+  acceptText: { color: colors.textOnBrand, fontWeight: "700", fontSize: 14 },
+  declineBtn: {
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    paddingHorizontal: space[4],
+    paddingVertical: space[2],
+  },
+  declineText: { color: colors.textMuted, fontWeight: "600", fontSize: 14 },
+  btnDisabled: { opacity: 0.5 },
   card: {
     flexDirection: "row",
     gap: space[3],

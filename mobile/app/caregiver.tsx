@@ -1,19 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Redirect, useRouter } from "expo-router";
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { useAuth } from "../src/context/AuthContext";
 import { caregiverApi } from "../src/lib/api/caregiver";
+import { ApiError } from "../src/lib/apiClient";
 import type { LinkedPatient } from "../src/lib/types";
 import { colors, radius, space } from "../src/theme";
 
 export default function CaregiverHome() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const query = useQuery({
     queryKey: ["caregiver-patients"],
     queryFn: () => caregiverApi.listPatients(),
     enabled: !!user,
+  });
+
+  const invite = useMutation({
+    mutationFn: (email: string) => caregiverApi.invitePatient(email),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["caregiver-patients"] }),
   });
 
   if (!user) return <Redirect href="/login" />;
@@ -43,6 +51,11 @@ export default function CaregiverHome() {
           data={query.data ?? []}
           keyExtractor={(item) => item.patientId}
           contentContainerStyle={styles.list}
+          ListHeaderComponent={
+            <View style={styles.headerBlock}>
+              <AddPatientForm onInvite={(email) => invite.mutateAsync(email)} />
+            </View>
+          }
           renderItem={({ item }) => (
             <PatientRow
               patient={item}
@@ -62,6 +75,79 @@ export default function CaregiverHome() {
           onRefresh={() => query.refetch()}
         />
       )}
+    </View>
+  );
+}
+
+function AddPatientForm({ onInvite }: { onInvite: (email: string) => Promise<unknown> }) {
+  const [open, setOpen] = useState(false);
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function submit() {
+    if (!email.trim()) return;
+    setError(null);
+    setNotice(null);
+    setSubmitting(true);
+    try {
+      await onInvite(email.trim());
+      setNotice("Invite sent — waiting for the patient to accept.");
+      setEmail("");
+      setOpen(false);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Couldn't send the invite. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (!open) {
+    return (
+      <View style={styles.addWrap}>
+        <Pressable style={styles.trigger} onPress={() => setOpen(true)}>
+          <Text style={styles.triggerText}>+ Add a patient</Text>
+        </Pressable>
+        {notice ? <Text style={styles.notice}>{notice}</Text> : null}
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.addCard}>
+      <Text style={styles.addLabel}>Patient's email</Text>
+      <TextInput
+        style={styles.input}
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        placeholder="patient@example.com"
+        placeholderTextColor={colors.textSubtle}
+        editable={!submitting}
+        autoFocus
+      />
+      {error ? <Text style={styles.formError}>{error}</Text> : null}
+      <View style={styles.addActions}>
+        <Pressable
+          style={[styles.inviteBtn, (!email.trim() || submitting) && styles.inviteDisabled]}
+          onPress={submit}
+          disabled={!email.trim() || submitting}
+        >
+          {submitting ? <ActivityIndicator color={colors.textOnBrand} /> : <Text style={styles.inviteText}>Invite</Text>}
+        </Pressable>
+        <Pressable
+          style={styles.cancelBtn}
+          onPress={() => {
+            setOpen(false);
+            setError(null);
+          }}
+          disabled={submitting}
+        >
+          <Text style={styles.cancelText}>Cancel</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -110,7 +196,52 @@ const styles = StyleSheet.create({
   },
   retryText: { color: colors.textOnBrand, fontWeight: "700" },
   list: { padding: space[5], gap: space[3] },
+  headerBlock: { marginBottom: space[3] },
   empty: { textAlign: "center", color: colors.textMuted, marginTop: space[8] },
+  addWrap: { gap: space[2] },
+  trigger: {
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    borderStyle: "dashed",
+    borderRadius: radius.md,
+    paddingVertical: space[4],
+    alignItems: "center",
+  },
+  triggerText: { color: colors.textLink, fontSize: 16, fontWeight: "600" },
+  notice: { color: colors.success, fontSize: 14, textAlign: "center" },
+  addCard: {
+    backgroundColor: colors.surfaceSunken,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    padding: space[4],
+    gap: space[2],
+  },
+  addLabel: { fontSize: 13, fontWeight: "600", color: colors.textMuted },
+  input: {
+    backgroundColor: colors.surfaceRaised,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
+    fontSize: 16,
+    color: colors.textStrong,
+  },
+  formError: { color: colors.danger, fontSize: 14 },
+  addActions: { flexDirection: "row", gap: space[2], marginTop: space[1] },
+  inviteBtn: {
+    backgroundColor: colors.brand,
+    borderRadius: radius.pill,
+    paddingHorizontal: space[5],
+    paddingVertical: space[3],
+    minWidth: 96,
+    alignItems: "center",
+  },
+  inviteText: { color: colors.textOnBrand, fontWeight: "700", fontSize: 15 },
+  inviteDisabled: { opacity: 0.5 },
+  cancelBtn: { paddingHorizontal: space[4], paddingVertical: space[3] },
+  cancelText: { color: colors.textMuted, fontWeight: "600", fontSize: 15 },
   card: {
     backgroundColor: colors.surfaceCard,
     borderRadius: radius.md,
