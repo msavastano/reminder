@@ -28,6 +28,7 @@ export default function RootLayout() {
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="patient" options={{ title: "Your reminders" }} />
             <Stack.Screen name="caregiver" options={{ title: "Your patients" }} />
+            <Stack.Screen name="messages" options={{ title: "Messages" }} />
           </Stack>
         </SafeAreaProvider>
       </AuthProvider>

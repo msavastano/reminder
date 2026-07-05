@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Redirect } from "expo-router";
+import { Link, Redirect } from "expo-router";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { QuickAddReminder } from "../src/components/QuickAddReminder";
 import { useAuth } from "../src/context/AuthContext";
@@ -39,9 +39,16 @@ export default function PatientHome() {
     <View style={styles.screen}>
       <View style={styles.header}>
         <Text style={styles.greeting}>Hi, {user.name.split(" ")[0]}</Text>
-        <Pressable onPress={logout} hitSlop={8}>
-          <Text style={styles.signOut}>Sign out</Text>
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Link href="/messages" asChild>
+            <Pressable hitSlop={8}>
+              <Text style={styles.headerLink}>Messages</Text>
+            </Pressable>
+          </Link>
+          <Pressable onPress={logout} hitSlop={8}>
+            <Text style={styles.signOut}>Sign out</Text>
+          </Pressable>
+        </View>
       </View>
 
       {query.isLoading ? (
@@ -119,6 +126,8 @@ const styles = StyleSheet.create({
     paddingBottom: space[2],
   },
   greeting: { fontSize: 20, fontWeight: "700", color: colors.textStrong },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: space[4] },
+  headerLink: { fontSize: 15, fontWeight: "600", color: colors.textLink },
   signOut: { fontSize: 15, fontWeight: "600", color: colors.textLink },
   center: { flex: 1, alignItems: "center", justifyContent: "center", gap: space[3] },
   error: { color: colors.danger, fontSize: 15 },

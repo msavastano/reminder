@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Redirect, Stack, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { MessagesSection } from "../../src/components/MessagesSection";
 import { QuickAddReminder } from "../../src/components/QuickAddReminder";
 import { useAuth } from "../../src/context/AuthContext";
 import { remindersApi, type CreateReminderInput } from "../../src/lib/api/reminders";
@@ -87,6 +88,11 @@ export default function PatientReminderManager() {
             />
           )}
           ListEmptyComponent={<Text style={styles.empty}>No reminders yet.</Text>}
+          ListFooterComponent={
+            <View style={styles.footer}>
+              <MessagesSection patientId={patientId} currentUserId={user.id} mode="caregiver" />
+            </View>
+          }
           refreshing={query.isFetching}
           onRefresh={() => query.refetch()}
         />
@@ -151,6 +157,7 @@ const styles = StyleSheet.create({
   retryText: { color: colors.textOnBrand, fontWeight: "700" },
   list: { padding: space[5], gap: space[3] },
   headerBlock: { marginBottom: space[3] },
+  footer: { marginTop: space[6] },
   empty: { textAlign: "center", color: colors.textMuted, marginTop: space[8] },
   card: {
     backgroundColor: colors.surfaceCard,
