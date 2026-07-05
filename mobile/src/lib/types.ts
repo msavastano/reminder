@@ -44,6 +44,27 @@ export interface Message {
   readAt: string | null;
 }
 
+export interface AiEvaluationResult {
+  clarity: string;
+  couldConfusePatient: boolean;
+  simplifiedText: string;
+  conflictNotes: string;
+}
+
+export interface AiEvaluation {
+  id: string;
+  reminderId: string;
+  requestedById: string;
+  result: AiEvaluationResult;
+  modelName: string;
+  createdAt: string;
+}
+
+export interface AiReminderSummary {
+  summary: string;
+  steps: string[];
+}
+
 export type LinkStatus = "PENDING" | "ACCEPTED";
 
 export interface LinkedPatient {

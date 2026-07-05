@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -96,6 +96,15 @@ export default function LoginScreen() {
               <Text style={styles.buttonText}>Sign in</Text>
             )}
           </Pressable>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>New here? </Text>
+            <Link href="/register" replace asChild>
+              <Pressable hitSlop={8}>
+                <Text style={styles.footerLink}>Create an account</Text>
+              </Pressable>
+            </Link>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -137,4 +146,7 @@ const styles = StyleSheet.create({
   },
   buttonPressed: { opacity: 0.85 },
   buttonText: { color: colors.textOnBrand, fontSize: 16, fontWeight: "700" },
+  footer: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginTop: space[2] },
+  footerText: { color: colors.textMuted, fontSize: 14 },
+  footerLink: { color: colors.textLink, fontSize: 14, fontWeight: "700" },
 });

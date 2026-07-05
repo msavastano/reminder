@@ -77,6 +77,20 @@ async function main() {
   const cookieMeRes = await fetch(`${BASE}/auth/me`, { headers: { Cookie: cookie } });
   check("cookie /auth/me → 200", cookieMeRes.status === 200, `got ${cookieMeRes.status}`);
 
+  // 7. Register a brand-new account (unique email each run) → 201 + token that
+  //    authenticates. Exercises the mobile Register screen's backend path.
+  const newEmail = `e2e+${Date.now()}@example.com`;
+  const regRes = await fetch(`${BASE}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: newEmail, password: "password123", name: "E2E Tester", role: "PATIENT" }),
+  });
+  const regBody = await regRes.json();
+  check("register → 201", regRes.status === 201, `got ${regRes.status}`);
+  check("register → token in body", typeof regBody.token === "string" && regBody.token.length > 20);
+  const regMe = await fetch(`${BASE}/auth/me`, { headers: { Authorization: `Bearer ${regBody.token}` } });
+  check("register token authenticates", regMe.status === 200, `got ${regMe.status}`);
+
   console.log(`\n${failures === 0 ? "PASS" : "FAIL"} — ${failures} failing check(s)`);
   process.exit(failures === 0 ? 0 : 1);
 }

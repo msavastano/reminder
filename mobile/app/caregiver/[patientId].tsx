@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Redirect, Stack, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { AiCheckPanel } from "../../src/components/AiCheckPanel";
 import { MessagesSection } from "../../src/components/MessagesSection";
 import { QuickAddReminder } from "../../src/components/QuickAddReminder";
 import { useAuth } from "../../src/context/AuthContext";
@@ -115,6 +117,7 @@ function ManagerRow({
   busy: boolean;
 }) {
   const addedByYou = reminder.createdById === currentUserId;
+  const [aiOpen, setAiOpen] = useState(false);
   return (
     <View style={[styles.card, reminder.completed && styles.cardDone]}>
       <Pressable style={styles.rowMain} onPress={onToggle} disabled={busy}>
@@ -137,9 +140,15 @@ function ManagerRow({
           </Text>
         </View>
       </Pressable>
-      <Pressable style={styles.deleteBtn} onPress={onDelete} disabled={busy} hitSlop={8}>
-        <Text style={styles.deleteText}>Delete</Text>
-      </Pressable>
+      <View style={styles.rowActions}>
+        <Pressable onPress={() => setAiOpen((v) => !v)} disabled={busy} hitSlop={8}>
+          <Text style={styles.aiText}>{aiOpen ? "Hide AI" : "AI check"}</Text>
+        </Pressable>
+        <Pressable onPress={onDelete} disabled={busy} hitSlop={8}>
+          <Text style={styles.deleteText}>Delete</Text>
+        </Pressable>
+      </View>
+      {aiOpen ? <AiCheckPanel reminderId={reminder.id} /> : null}
     </View>
   );
 }
@@ -194,6 +203,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   recurBadgeText: { fontSize: 11, color: colors.textMuted, fontWeight: "700", textTransform: "capitalize" },
-  deleteBtn: { alignSelf: "flex-end", paddingVertical: space[1], paddingHorizontal: space[2] },
+  rowActions: { flexDirection: "row", justifyContent: "flex-end", gap: space[4], paddingTop: space[1] },
+  aiText: { color: colors.textLink, fontWeight: "600", fontSize: 14 },
   deleteText: { color: colors.danger, fontWeight: "600", fontSize: 14 },
 });
