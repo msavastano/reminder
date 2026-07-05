@@ -5,6 +5,7 @@ import { ActivityIndicator, Alert, FlatList, Pressable, StyleSheet, Text, View }
 import { AiCheckPanel } from "../../src/components/AiCheckPanel";
 import { MessagesSection } from "../../src/components/MessagesSection";
 import { QuickAddReminder } from "../../src/components/QuickAddReminder";
+import { ReminderForm } from "../../src/components/ReminderForm";
 import { useAuth } from "../../src/context/AuthContext";
 import { remindersApi, type CreateReminderInput } from "../../src/lib/api/reminders";
 import { formatFriendlyDateTime } from "../../src/lib/dateFormat";
@@ -29,6 +30,10 @@ export default function PatientReminderManager() {
 
   const create = useMutation({
     mutationFn: (input: CreateReminderInput) => remindersApi.create(patientId, input),
+    onSuccess: invalidate,
+  });
+  const update = useMutation({
+    mutationFn: ({ id, input }: { id: string; input: CreateReminderInput }) => remindersApi.update(id, input),
     onSuccess: invalidate,
   });
   const toggle = useMutation({
@@ -74,6 +79,7 @@ export default function PatientReminderManager() {
           ListHeaderComponent={
             <View style={styles.headerBlock}>
               <QuickAddReminder
+                detailed
                 onSubmit={async (input) => {
                   await create.mutateAsync(input);
                 }}
@@ -86,7 +92,10 @@ export default function PatientReminderManager() {
               currentUserId={user.id}
               onToggle={() => toggle.mutate(item)}
               onDelete={() => confirmDelete(item)}
-              busy={toggle.isPending || remove.isPending}
+              onUpdate={async (input) => {
+                await update.mutateAsync({ id: item.id, input });
+              }}
+              busy={toggle.isPending || remove.isPending || update.isPending}
             />
           )}
           ListEmptyComponent={<Text style={styles.empty}>No reminders yet.</Text>}
@@ -108,16 +117,42 @@ function ManagerRow({
   currentUserId,
   onToggle,
   onDelete,
+  onUpdate,
   busy,
 }: {
   reminder: Reminder;
   currentUserId: string;
   onToggle: () => void;
   onDelete: () => void;
+  onUpdate: (input: CreateReminderInput) => Promise<void>;
   busy: boolean;
 }) {
   const addedByYou = reminder.createdById === currentUserId;
   const [aiOpen, setAiOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+
+  if (editing) {
+    return (
+      <View style={[styles.card, styles.cardEditing]}>
+        <ReminderForm
+          detailed
+          submitLabel="Save changes"
+          initial={{
+            title: reminder.title,
+            body: reminder.body,
+            dueAt: reminder.dueAt,
+            recurrenceRule: reminder.recurrenceRule,
+          }}
+          onCancel={() => setEditing(false)}
+          onSubmit={async (input) => {
+            await onUpdate(input);
+            setEditing(false);
+          }}
+        />
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.card, reminder.completed && styles.cardDone]}>
       <Pressable style={styles.rowMain} onPress={onToggle} disabled={busy}>
@@ -143,6 +178,9 @@ function ManagerRow({
       <View style={styles.rowActions}>
         <Pressable onPress={() => setAiOpen((v) => !v)} disabled={busy} hitSlop={8}>
           <Text style={styles.aiText}>{aiOpen ? "Hide AI" : "AI check"}</Text>
+        </Pressable>
+        <Pressable onPress={() => setEditing(true)} disabled={busy} hitSlop={8}>
+          <Text style={styles.editText}>Edit</Text>
         </Pressable>
         <Pressable onPress={onDelete} disabled={busy} hitSlop={8}>
           <Text style={styles.deleteText}>Delete</Text>
@@ -177,6 +215,7 @@ const styles = StyleSheet.create({
     gap: space[2],
   },
   cardDone: { opacity: 0.6 },
+  cardEditing: { padding: 0, borderColor: colors.brand },
   rowMain: { flexDirection: "row", gap: space[3] },
   cardText: { flex: 1, gap: space[1] },
   titleLine: { flexDirection: "row", alignItems: "center", gap: space[2], flexWrap: "wrap" },
@@ -205,5 +244,6 @@ const styles = StyleSheet.create({
   recurBadgeText: { fontSize: 11, color: colors.textMuted, fontWeight: "700", textTransform: "capitalize" },
   rowActions: { flexDirection: "row", justifyContent: "flex-end", gap: space[4], paddingTop: space[1] },
   aiText: { color: colors.textLink, fontWeight: "600", fontSize: 14 },
+  editText: { color: colors.textLink, fontWeight: "600", fontSize: 14 },
   deleteText: { color: colors.danger, fontWeight: "600", fontSize: 14 },
 });

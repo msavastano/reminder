@@ -74,6 +74,17 @@ async function main() {
   check("complete → 200", completed.status === 200, `got ${completed.status}`);
   check("completed flag set", completed.body?.reminder?.completed === true);
 
+  // Update (edit) — title, body, due date, recurrence.
+  const newDue = new Date(Date.now() + 2 * 3600_000).toISOString();
+  const updated = await bearer(token, `/reminders/${reminderId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ title: "e2e edited title", body: "edited body", dueAt: newDue, recurrenceRule: "weekly" }),
+  });
+  check("update → 200", updated.status === 200, `got ${updated.status}`);
+  check("update applied title", updated.body?.reminder?.title === "e2e edited title");
+  check("update applied recurrence", updated.body?.reminder?.recurrenceRule === "weekly");
+  check("update applied dueAt", new Date(updated.body?.reminder?.dueAt).toISOString() === newDue);
+
   // Delete
   const del = await bearer(token, `/reminders/${reminderId}`, { method: "DELETE" });
   check("delete → 204", del.status === 204, `got ${del.status}`);
