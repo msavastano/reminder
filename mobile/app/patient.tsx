@@ -1,20 +1,35 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Redirect } from "expo-router";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { QuickAddReminder } from "../src/components/QuickAddReminder";
 import { useAuth } from "../src/context/AuthContext";
-import { remindersApi } from "../src/lib/api/reminders";
+import { remindersApi, type CreateReminderInput } from "../src/lib/api/reminders";
 import { formatFriendlyDateTime } from "../src/lib/dateFormat";
 import type { Reminder } from "../src/lib/types";
 import { colors, radius, space } from "../src/theme";
 
 export default function PatientHome() {
   const { user, logout } = useAuth();
-
+  const queryClient = useQueryClient();
   const patientId = user?.id;
+  const remindersKey = ["reminders", patientId];
+
   const query = useQuery({
-    queryKey: ["reminders", patientId],
+    queryKey: remindersKey,
     queryFn: () => remindersApi.list(patientId as string),
     enabled: !!patientId,
+  });
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: remindersKey });
+
+  const toggle = useMutation({
+    mutationFn: (r: Reminder) => remindersApi.setCompleted(r.id, !r.completed),
+    onSuccess: invalidate,
+  });
+
+  const create = useMutation({
+    mutationFn: (input: CreateReminderInput) => remindersApi.create(patientId as string, input),
+    onSuccess: invalidate,
   });
 
   // Deep-link / logged-out safety.
@@ -45,7 +60,18 @@ export default function PatientHome() {
           data={query.data ?? []}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
-          renderItem={({ item }) => <ReminderRow reminder={item} />}
+          ListHeaderComponent={
+            <View style={styles.headerBlock}>
+              <QuickAddReminder
+                onSubmit={async (input) => {
+                  await create.mutateAsync(input);
+                }}
+              />
+            </View>
+          }
+          renderItem={({ item }) => (
+            <ReminderRow reminder={item} onToggle={() => toggle.mutate(item)} busy={toggle.isPending} />
+          )}
           ListEmptyComponent={<Text style={styles.empty}>You have no reminders yet.</Text>}
           refreshing={query.isFetching}
           onRefresh={() => query.refetch()}
@@ -55,20 +81,30 @@ export default function PatientHome() {
   );
 }
 
-function ReminderRow({ reminder }: { reminder: Reminder }) {
+function ReminderRow({
+  reminder,
+  onToggle,
+  busy,
+}: {
+  reminder: Reminder;
+  onToggle: () => void;
+  busy: boolean;
+}) {
   return (
-    <View style={[styles.card, reminder.completed && styles.cardDone]}>
-      <View style={styles.cardTop}>
-        <Text style={[styles.cardTitle, reminder.completed && styles.cardTitleDone]}>{reminder.title}</Text>
-        {reminder.completed ? (
-          <View style={styles.badgeDone}>
-            <Text style={styles.badgeDoneText}>Done</Text>
-          </View>
-        ) : null}
+    <Pressable
+      style={({ pressed }) => [styles.card, reminder.completed && styles.cardDone, pressed && styles.cardPressed]}
+      onPress={onToggle}
+      disabled={busy}
+    >
+      <View style={[styles.checkbox, reminder.completed && styles.checkboxDone]}>
+        {reminder.completed ? <Text style={styles.checkmark}>✓</Text> : null}
       </View>
-      {reminder.body ? <Text style={styles.cardBody}>{reminder.body}</Text> : null}
-      <Text style={styles.cardWhen}>{formatFriendlyDateTime(reminder.dueAt)}</Text>
-    </View>
+      <View style={styles.cardText}>
+        <Text style={[styles.cardTitle, reminder.completed && styles.cardTitleDone]}>{reminder.title}</Text>
+        {reminder.body ? <Text style={styles.cardBody}>{reminder.body}</Text> : null}
+        <Text style={styles.cardWhen}>{formatFriendlyDateTime(reminder.dueAt)}</Text>
+      </View>
+    </Pressable>
   );
 }
 
@@ -94,26 +130,34 @@ const styles = StyleSheet.create({
   },
   retryText: { color: colors.textOnBrand, fontWeight: "700" },
   list: { padding: space[5], gap: space[3] },
+  headerBlock: { marginBottom: space[3] },
   empty: { textAlign: "center", color: colors.textMuted, marginTop: space[8] },
   card: {
+    flexDirection: "row",
+    gap: space[3],
     backgroundColor: colors.surfaceCard,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.borderSoft,
     padding: space[4],
-    gap: space[2],
   },
+  cardPressed: { opacity: 0.7 },
   cardDone: { opacity: 0.6 },
-  cardTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space[3] },
-  cardTitle: { fontSize: 17, fontWeight: "700", color: colors.textStrong, flexShrink: 1 },
+  cardText: { flex: 1, gap: space[1] },
+  cardTitle: { fontSize: 17, fontWeight: "700", color: colors.textStrong },
   cardTitleDone: { textDecorationLine: "line-through" },
   cardBody: { fontSize: 15, color: colors.textBody },
   cardWhen: { fontSize: 14, color: colors.textMuted },
-  badgeDone: {
-    backgroundColor: colors.brandSoft,
+  checkbox: {
+    width: 26,
+    height: 26,
     borderRadius: radius.pill,
-    paddingHorizontal: space[3],
-    paddingVertical: space[1],
+    borderWidth: 2,
+    borderColor: colors.borderStrong,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
   },
-  badgeDoneText: { color: colors.brandSoftFg, fontSize: 12, fontWeight: "700" },
+  checkboxDone: { backgroundColor: colors.success, borderColor: colors.success },
+  checkmark: { color: colors.textOnBrand, fontSize: 15, fontWeight: "900", lineHeight: 18 },
 });

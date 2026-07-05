@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Redirect } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { useAuth } from "../src/context/AuthContext";
 import { caregiverApi } from "../src/lib/api/caregiver";
@@ -8,6 +8,7 @@ import { colors, radius, space } from "../src/theme";
 
 export default function CaregiverHome() {
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   const query = useQuery({
     queryKey: ["caregiver-patients"],
@@ -42,7 +43,20 @@ export default function CaregiverHome() {
           data={query.data ?? []}
           keyExtractor={(item) => item.patientId}
           contentContainerStyle={styles.list}
-          renderItem={({ item }) => <PatientRow patient={item} />}
+          renderItem={({ item }) => (
+            <PatientRow
+              patient={item}
+              onPress={
+                item.status === "ACCEPTED"
+                  ? () =>
+                      router.push({
+                        pathname: "/caregiver/[patientId]",
+                        params: { patientId: item.patientId, name: item.name },
+                      })
+                  : undefined
+              }
+            />
+          )}
           ListEmptyComponent={<Text style={styles.empty}>No linked patients yet.</Text>}
           refreshing={query.isFetching}
           onRefresh={() => query.refetch()}
@@ -52,10 +66,14 @@ export default function CaregiverHome() {
   );
 }
 
-function PatientRow({ patient }: { patient: LinkedPatient }) {
+function PatientRow({ patient, onPress }: { patient: LinkedPatient; onPress?: () => void }) {
   const pending = patient.status === "PENDING";
   return (
-    <View style={styles.card}>
+    <Pressable
+      style={({ pressed }) => [styles.card, pressed && onPress ? styles.cardPressed : null]}
+      onPress={onPress}
+      disabled={!onPress}
+    >
       <View style={styles.cardTop}>
         <Text style={styles.cardTitle}>{patient.name}</Text>
         <View style={[styles.badge, pending ? styles.badgePending : styles.badgeActive]}>
@@ -65,7 +83,8 @@ function PatientRow({ patient }: { patient: LinkedPatient }) {
         </View>
       </View>
       <Text style={styles.cardEmail}>{patient.email}</Text>
-    </View>
+      {onPress ? <Text style={styles.cardHint}>Tap to manage reminders ›</Text> : null}
+    </Pressable>
   );
 }
 
@@ -100,9 +119,11 @@ const styles = StyleSheet.create({
     padding: space[4],
     gap: space[2],
   },
+  cardPressed: { opacity: 0.7 },
   cardTop: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space[3] },
   cardTitle: { fontSize: 17, fontWeight: "700", color: colors.textStrong, flexShrink: 1 },
   cardEmail: { fontSize: 14, color: colors.textMuted },
+  cardHint: { fontSize: 13, color: colors.textLink, fontWeight: "600", marginTop: space[1] },
   badge: { borderRadius: radius.pill, paddingHorizontal: space[3], paddingVertical: space[1] },
   badgeText: { fontSize: 12, fontWeight: "700" },
   badgeActive: { backgroundColor: colors.brandSoft },
