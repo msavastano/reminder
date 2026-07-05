@@ -63,38 +63,62 @@ iOS binaries are built in the cloud via **EAS Build** — no macOS/Xcode needed.
 - **development** — internal dev-client build (`expo-dev-client`) for on-device
   debugging against a LAN backend. Points `EXPO_PUBLIC_API_URL` at your dev
   machine's LAN IP (edit it in `eas.json`).
-- **preview** — internal distribution (ad-hoc / TestFlight-style) against the
-  deployed Vercel API.
-- **production** — App Store build, `autoIncrement` on, against the Vercel API.
+- **preview** — internal (ad-hoc) distribution against the deployed Vercel API.
+  Installs only on devices whose UDID you register (`eas device:create`).
+- **production** — App Store distribution build, `autoIncrement` on. Needs **no**
+  device registration.
 
-One-time setup:
+The EAS project is already linked in `app.config.ts` (`owner` +
+`extra.eas.projectId`), so `eas init` is **not** needed and non-interactive
+GitHub/dashboard builds resolve the project automatically.
+
+Before a build actually reaches a real backend, set the profile's
+`EXPO_PUBLIC_API_URL` in `eas.json` to your deployed Vercel URL (the
+`your-app.vercel.app` values are placeholders). This does **not** block the
+build; it only affects which API the installed app calls.
+
+### iOS signing credentials
+
+A build fails at the signing step until an Apple Distribution Certificate +
+Provisioning Profile exist on EAS. GitHub/dashboard builds run
+non-interactively and can't create them on the fly, so establish them **once**
+by initiating a build from your terminal (the build still runs in EAS cloud;
+this just lets you answer the Apple prompts). The **production** profile is the
+least-friction target because App Store distribution needs no device UDIDs:
 
 ```powershell
 npm install -g eas-cli
-eas login                      # your Expo account
-eas init                       # links the project, writes extra.eas.projectId
+eas login                                     # account in your Expo org
+cd mobile
+eas build --platform ios --profile production
 ```
 
-Fill in the real values before building/submitting:
+First-time prompts: log in to your Apple account (Apple ID + 2FA), pick the Team
+with your paid membership, then answer **Yes** to "Generate a new Apple
+Distribution Certificate" and "Generate a new Apple Provisioning Profile". EAS
+registers the bundle ID `com.reminder.mobile`, creates the cert + profile, and
+stores them on EAS servers. After this, **re-running the GitHub/dashboard build
+reuses them with no prompts**.
 
-- In `eas.json`, replace the `your-app.vercel.app` URLs and the `REPLACE_WITH_*`
-  submit fields (`appleId`, `ascAppId`, `appleTeamId`). EAS can also manage these
-  interactively at submit time instead of storing them here.
+Fully-automated alternative (no terminal): create an **App Store Connect API
+Key** (App Store Connect → Users and Access → Integrations → App Store Connect
+API; role App Manager), download the `.p8` once, note the Key ID + Issuer ID, and
+add it under the project's iOS credentials in the Expo dashboard (or
+`eas credentials`). EAS then manages certs/profiles with zero interactive Apple
+login.
 
-Build & submit:
+> Never commit the `.p8`, your Apple ID, or any key to the repo or `eas.json`.
+> The `submit.*` Apple fields in `eas.json` are read only by `eas submit`, never
+> by `eas build`.
+
+### Install on your own iPhone / submit
 
 ```powershell
-# On-device dev build (install once, then use the Metro dev server)
-eas build --platform ios --profile development
-
-# Shareable internal build
+# Install a test build on your iPhone — register the device first
+eas device:create
 eas build --platform ios --profile preview
 
-# App Store build + submission (EAS manages signing/certificates)
+# App Store build + submission (fill in eas.json submit.* fields first)
 eas build --platform ios --profile production
 eas submit --platform ios --profile production
 ```
-
-Requires an **Apple Developer account** (you have one). EAS handles certificates
-and provisioning profiles; you'll authenticate with Apple when prompted (or via
-`eas credentials`).
