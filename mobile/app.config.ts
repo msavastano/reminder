@@ -15,7 +15,10 @@ const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:4000";
 
 const config: ExpoConfig = {
   name: "Reminder",
-  slug: "reminder-mobile",
+  // slug + owner + extra.eas.projectId must match the EAS project on expo.dev so
+  // non-interactive (GitHub/dashboard-triggered) builds resolve it without `eas init`.
+  slug: "reminder",
+  owner: "mikesavastanos-organization",
   version: "1.0.0",
   orientation: "portrait",
   scheme: "remindermobile",
@@ -39,6 +42,9 @@ const config: ExpoConfig = {
   plugins: ["expo-router", "expo-secure-store"],
   extra: {
     apiUrl,
+    eas: {
+      projectId: "f507d05c-784b-48ca-8f6d-2b4d4f2682af",
+    },
   },
 };
 
