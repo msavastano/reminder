@@ -20,13 +20,13 @@
         "simulator": false
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://your-app.vercel.app/api"
+        "EXPO_PUBLIC_API_URL": "https://reminder.michaelsavastano.com/api"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://your-app.vercel.app/api"
+        "EXPO_PUBLIC_API_URL": "https://reminder.michaelsavastano.com/api"
       }
     }
   },
