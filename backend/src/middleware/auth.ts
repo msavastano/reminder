@@ -11,8 +11,21 @@ declare global {
   }
 }
 
+/**
+ * Resolves the auth token from either an `Authorization: Bearer <token>` header
+ * (used by the mobile client, which has no cookie jar) or the `reminder_token`
+ * httpOnly cookie (used by the web SPA). The header takes precedence.
+ */
+function getAuthToken(req: Request): string | undefined {
+  const header = req.headers.authorization;
+  if (header?.startsWith("Bearer ")) {
+    return header.slice("Bearer ".length).trim();
+  }
+  return req.cookies?.[AUTH_COOKIE_NAME];
+}
+
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  const token = req.cookies?.[AUTH_COOKIE_NAME];
+  const token = getAuthToken(req);
   if (!token) {
     res.status(401).json({ error: "Not authenticated" });
     return;

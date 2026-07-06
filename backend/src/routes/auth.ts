@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
 import { AUTH_COOKIE_NAME, signAuthToken } from "../lib/jwt.js";
 import { requireAuth } from "../middleware/auth.js";
+import { loginSchema, registerSchema } from "../schemas/auth.js";
 
 const router = Router();
 
@@ -22,11 +23,12 @@ function publicUser(user: { id: string; email: string; name: string; role: strin
 }
 
 router.post("/register", async (req, res) => {
-  const { email, password, name, role } = req.body ?? {};
-  if (!email || !password || !name || (role !== "PATIENT" && role !== "CAREGIVER")) {
-    res.status(400).json({ error: "email, password, name, and a valid role are required" });
+  const parsed = registerSchema.safeParse(req.body ?? {});
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid registration details" });
     return;
   }
+  const { email, password, name, role } = parsed.data;
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
     res.status(409).json({ error: "An account with that email already exists" });
@@ -38,15 +40,17 @@ router.post("/register", async (req, res) => {
   });
   const token = signAuthToken({ userId: user.id, role: user.role });
   setAuthCookie(res, token);
-  res.status(201).json({ user: publicUser(user) });
+  // Web reads the cookie; the mobile client (no cookie jar) reads `token`.
+  res.status(201).json({ user: publicUser(user), token });
 });
 
 router.post("/login", async (req, res) => {
-  const { email, password } = req.body ?? {};
-  if (!email || !password) {
-    res.status(400).json({ error: "email and password are required" });
+  const parsed = loginSchema.safeParse(req.body ?? {});
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Invalid login details" });
     return;
   }
+  const { email, password } = parsed.data;
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
     res.status(401).json({ error: "Invalid email or password" });
@@ -59,7 +63,8 @@ router.post("/login", async (req, res) => {
   }
   const token = signAuthToken({ userId: user.id, role: user.role });
   setAuthCookie(res, token);
-  res.json({ user: publicUser(user) });
+  // Web reads the cookie; the mobile client (no cookie jar) reads `token`.
+  res.json({ user: publicUser(user), token });
 });
 
 router.post("/logout", (_req, res) => {
