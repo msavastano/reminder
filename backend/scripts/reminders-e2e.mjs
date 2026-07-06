@@ -54,6 +54,16 @@ async function main() {
   const before = await bearer(token, `/patients/${patientId}/reminders`);
   const beforeCount = before.body?.reminders?.length ?? 0;
 
+  // Current (the "hero" reminder the mobile patient screen shows)
+  const current = await bearer(token, `/patients/${patientId}/reminders/current`);
+  check("current → 200", current.status === 200, `got ${current.status}`);
+  check("current → reminder key present", current.body && "reminder" in current.body);
+  const currentReminder = current.body?.reminder;
+  if (currentReminder) {
+    check("current reminder incomplete", currentReminder.completed === false);
+    check("current reminder has title/dueAt", typeof currentReminder.title === "string" && typeof currentReminder.dueAt === "string");
+  }
+
   // Create
   const created = await bearer(token, `/patients/${patientId}/reminders`, {
     method: "POST",

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, Redirect } from "expo-router";
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { CurrentReminderHero } from "../src/components/CurrentReminderHero";
 import { QuickAddReminder } from "../src/components/QuickAddReminder";
 import { UnderstandHelper } from "../src/components/UnderstandHelper";
 import { useAuth } from "../src/context/AuthContext";
@@ -98,6 +99,7 @@ export default function PatientHome() {
                   busy={invitesBusy}
                 />
               ) : null}
+              <CurrentReminderHero patientId={user.id} />
               <UnderstandHelper patientId={user.id} />
               <QuickAddReminder
                 onSubmit={async (input) => {
