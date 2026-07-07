@@ -35,6 +35,25 @@ export function PatientShell() {
     refreshLinks();
   }, [refreshLinks]);
 
+  // Keeps reminders/messages in sync with changes a caregiver makes elsewhere,
+  // without the patient needing to hit refresh. The interval catches updates
+  // while the tab sits open; the visibility/focus listeners force an
+  // immediate refetch when the patient switches back to this tab rather than
+  // waiting out the rest of the interval.
+  useEffect(() => {
+    const interval = setInterval(bump, 20_000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") bump();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", bump);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", bump);
+    };
+  }, [bump]);
+
   async function answerInvite(invite: CaregiverInvite, accept: boolean) {
     setAnswering(invite.inviteId);
     try {
