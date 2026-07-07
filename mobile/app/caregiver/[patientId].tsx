@@ -47,6 +47,12 @@ export default function PatientReminderManager() {
 
   if (!user) return <Redirect href="/login" />;
 
+  // Pull-to-refresh must also cover the messages thread embedded in the list
+  // footer (its own query key, "messages"/patientId) — otherwise only the
+  // reminders list above it refreshes.
+  const refreshAll = () =>
+    Promise.all([query.refetch(), queryClient.invalidateQueries({ queryKey: ["messages", patientId] })]);
+
   function confirmDelete(reminder: Reminder) {
     Alert.alert("Delete reminder", `Delete "${reminder.title}"?`, [
       { text: "Cancel", style: "cancel" },
@@ -105,7 +111,7 @@ export default function PatientReminderManager() {
             </View>
           }
           refreshing={query.isFetching}
-          onRefresh={() => query.refetch()}
+          onRefresh={refreshAll}
         />
       )}
     </View>

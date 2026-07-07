@@ -57,6 +57,18 @@ export default function PatientHome() {
   const invites = invitesQuery.data ?? [];
   const invitesBusy = accept.isPending || decline.isPending;
 
+  // Pull-to-refresh must cover every query shown on this screen — the hero and
+  // invites banner live in ListHeaderComponent with their own query keys, so
+  // refetching just the reminders list (the FlatList's own query) leaves them
+  // stale. Without this, a caregiver-side change only ever showed up after a
+  // full logout/login (which remounts everything fresh).
+  const refreshAll = () =>
+    Promise.all([
+      query.refetch(),
+      queryClient.invalidateQueries({ queryKey: ["reminder-current", patientId] }),
+      invalidateInvites(),
+    ]);
+
   return (
     <View style={styles.screen}>
       <View style={styles.header}>
@@ -113,7 +125,7 @@ export default function PatientHome() {
           )}
           ListEmptyComponent={<Text style={styles.empty}>You have no reminders yet.</Text>}
           refreshing={query.isFetching}
-          onRefresh={() => query.refetch()}
+          onRefresh={refreshAll}
         />
       )}
     </View>
